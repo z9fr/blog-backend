@@ -44,4 +44,14 @@ func (s *Service) GetComment(ID uint)(Comment, error){
   return comment, nil
 }
 
+// GetCommentsBySlug - retrieves all comments by slug ( path - /article/name )
+func (s *Service) GetCommentsBySlug(slug string) ([]Comment, error){
+  var comments []Comment
 
+  if result := s.DB.Find(&comments).Where("slug =?", slug); result.Error != nil{
+    return []Comment{}, result.Error
+  }
+
+  return comments, nil
+
+}
