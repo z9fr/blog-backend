@@ -80,21 +80,21 @@ func (s *Service) UpdateComment(ID uint, newComment Comment) (Comment, error) {
 
 }
 
-// DeleteComment - Delete a comment by ID 
-func (s *Service) DeleteComment(ID uint) error{
-  if result := s.DB.Delete(&Comment{}, ID) ; result.Error != nil{
-    return result.Error
-  }
+// DeleteComment - Delete a comment by ID
+func (s *Service) DeleteComment(ID uint) error {
+	if result := s.DB.Delete(&Comment{}, ID); result.Error != nil {
+		return result.Error
+	}
 
-  return nil
+	return nil
 }
 
 // DeleteComment - deletes a comment from the database by ID
-func (s *Service) GetAllComments() ([]Comment, error){
-  var comments []Comment
+func (s *Service) GetAllComments() ([]Comment, error) {
+	var comments []Comment
 
-  if result := s.DB.Find(&comments); result.Error != nil{
-    return []Comment{}, result.Error
-  }
-  return comments, nil
+	if result := s.DB.Find(&comments); result.Error != nil {
+		return []Comment{}, result.Error
+	}
+	return comments, nil
 }
