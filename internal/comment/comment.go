@@ -56,10 +56,45 @@ func (s *Service) GetCommentsBySlug(slug string) ([]Comment, error) {
 }
 
 // PostComment - Create a new comment to the database
-func (s *Service) PostComment(comment Comment) (Comment, error){
-  if result := s.DB.Save(&comment); result.Error != nil {
-    return Comment{}, result.Error
+func (s *Service) PostComment(comment Comment) (Comment, error) {
+	if result := s.DB.Save(&comment); result.Error != nil {
+		return Comment{}, result.Error
+	}
+
+	return comment, nil
+}
+
+// UpdateComment - updates a comment by ID with new comment info
+func (s *Service) UpdateComment(ID uint, newComment Comment) (Comment, error) {
+	comment, err := s.GetComment(ID)
+
+	if err != nil {
+		return Comment{}, err
+	}
+
+	if result := s.DB.Model(&comment).Updates(newComment); result.Error != nil {
+		return Comment{}, result.Error
+	}
+
+	return comment, nil
+
+}
+
+// DeleteComment - Delete a comment by ID 
+func (s *Service) DeleteComment(ID uint) error{
+  if result := s.DB.Delete(&Comment{}, ID) ; result.Error != nil{
+    return result.Error
   }
-  
-  return comment,nil
+
+  return nil
+}
+
+// DeleteComment - deletes a comment from the database by ID
+func (s *Service) GetAllComments() ([]Comment, error){
+  var comments []Comment
+
+  if result := s.DB.Find(&comments); result.Error != nil{
+    return []Comment{}, result.Error
+  }
+  return comments, nil
 }
