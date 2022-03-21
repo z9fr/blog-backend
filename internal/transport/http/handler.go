@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -19,7 +20,7 @@ func NewHandler() *Handler {
 
 // SetupRoutes - sets up all the routes for our application
 func (h *Handler) SetupRotues() {
-	fmt.Printf("Setting up routes")
+	log.Printf("Setting up routes")
 
 	// initicate new gorilla mox router
 	h.Router = mux.NewRouter()
