@@ -2,11 +2,12 @@ package comment
 
 import "gorm.io/gorm"
 
-//Service - our comment service
+// Service - our comment service
 type Service struct{
   DB *gorm.DB
 }
 
+// Comment
 type Comment struct{
   gorm.Model
   Slug string
@@ -31,4 +32,16 @@ func NewService(db *gorm.DB) *Service{
     DB: db, 
   }
 }
+
+// GetComment - return a comment by ID
+func (s *Service) GetComment(ID uint)(Comment, error){
+  var comment Comment
+
+  if result := s.DB.First(&comment, ID); result.Error != nil{
+    return Comment{}, result.Error
+  }
+
+  return comment, nil
+}
+
 
