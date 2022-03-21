@@ -1,6 +1,7 @@
 package main
 
 import (
+	"api/internal/database"
 	transportHttp "api/internal/transport/http"
 	"log"
 	"net/http"
@@ -14,6 +15,13 @@ type App struct{}
 func (app *App) Run() error {
 
   log.Printf("Setting up the API on http://localhost:4000")
+
+  var err error
+  _ , err = database.NewDatabase()
+
+  if err != nil{
+    return err
+  }
 
   handler := transportHttp.NewHandler()
   handler.SetupRotues()
