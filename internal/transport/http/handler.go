@@ -2,6 +2,7 @@ package http
 
 import (
 	"api/internal/comment"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,6 +24,11 @@ func NewHandler(service *comment.Service) *Handler {
 	}
 }
 
+// Response - an object to store responses from our api
+type Response struct {
+	Message string
+}
+
 // SetupRoutes - sets up all the routes for our application
 func (h *Handler) SetupRotues() {
 	log.Printf("Setting up routes")
@@ -36,7 +42,13 @@ func (h *Handler) SetupRotues() {
 	h.Router.HandleFunc("/api/comment/delete/{id}", h.DeleteComment).Methods("DELETE")
 	h.Router.HandleFunc("/api/comment/update", h.UpdateComment).Methods("PUT")
 	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "API running ok ")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(Response{
+			Message: "Api is Running OK",
+		}); err != nil {
+			log.Panic(err)
+		}
 	})
 
 }
@@ -59,7 +71,12 @@ func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "Error Fetching Comment")
 	}
 
-	fmt.Fprint(w, comment)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(comment); err != nil {
+		log.Panic(err)
+	}
 }
 
 // GetAllComments - retriews all comments from the database
@@ -69,8 +86,12 @@ func (h *Handler) GetAllComments(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprint(w, err)
 	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
 
-	fmt.Fprint(w, comments)
+	if err := json.NewEncoder(w).Encode(comments); err != nil {
+		log.Panic(err)
+	}
 }
 
 // PostComment - add a new comment
@@ -84,7 +105,12 @@ func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err)
 	}
 
-	fmt.Fprint(w, comment)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(comment); err != nil {
+		log.Panic(err)
+	}
 }
 
 // UpdateComment - Update comment
@@ -96,7 +122,13 @@ func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprint(w, "Error updating the comment")
 	}
-	fmt.Fprint(w, "updated", comment)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(comment); err != nil {
+		log.Panic(err)
+	}
 }
 
 // DeleteComment - Delete a comment by id
@@ -104,6 +136,7 @@ func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	commentId, err := strconv.ParseUint(id, 10, 64)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	if err != nil {
 		fmt.Fprint(w, "Enable to parse UINT from ID ")
@@ -112,9 +145,18 @@ func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	err = h.Service.DeleteComment(uint(commentId))
 
 	if err != nil {
-		fmt.Fprint(w, "Failed to delete comment")
+		w.WriteHeader(http.StatusBadRequest)
+		if err := json.NewEncoder(w).Encode(Response{
+			Message: "Failed to delete comment",
+		}); err != nil {
+			log.Panic(err)
+		}
 	}
 
-	fmt.Fprint(w, "Successfully deleted the comment")
-
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(Response{
+		Message: "Successfully deleted the comment",
+	}); err != nil {
+		log.Panic(err)
+	}
 }
