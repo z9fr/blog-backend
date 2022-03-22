@@ -17,13 +17,18 @@ func (app *App) Run() error {
 
 	log.Printf("Setting up the API on http://localhost:4000")
 
-  db, err := database.NewDatabase()
+	db, err := database.NewDatabase()
 
 	if err != nil {
 		return err
 	}
 
-  commentService := comment.NewService(db)
+	err = database.MigrateDB(db)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	commentService := comment.NewService(db)
 
 	handler := transportHttp.NewHandler(commentService)
 	handler.SetupRotues()
