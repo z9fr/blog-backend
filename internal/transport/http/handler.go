@@ -40,7 +40,7 @@ func (h *Handler) SetupRotues() {
 	h.Router.HandleFunc("/api/comment/{id}", h.GetComment).Methods("GET")
 	h.Router.HandleFunc("/api/comment/create", h.PostComment).Methods("POST")
 	h.Router.HandleFunc("/api/comment/delete/{id}", h.DeleteComment).Methods("DELETE")
-	h.Router.HandleFunc("/api/comment/update", h.UpdateComment).Methods("PUT")
+	h.Router.HandleFunc("/api/comment/update/{id}", h.UpdateComment).Methods("PUT")
 	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
@@ -50,7 +50,6 @@ func (h *Handler) SetupRotues() {
 			log.Panic(err)
 		}
 	})
-
 }
 
 // GetComment - Retriew comment by ID
@@ -96,18 +95,21 @@ func (h *Handler) GetAllComments(w http.ResponseWriter, r *http.Request) {
 
 // PostComment - add a new comment
 func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
-	// Just for testing
-	comment, err := h.Service.PostComment(comment.Comment{
-		Slug: "/test",
-	})
-
-	if err != nil {
-		fmt.Fprint(w, err)
-	}
+  var comment comment.Comment
+  // getting the comment from request body
+  if err := json.NewDecoder(r.Body).Decode(&comment); err != nil{
+    w.WriteHeader(http.StatusBadRequest)
+    fmt.Fprint(w, "Failed to decode JSON body")
+  }
+  // saving the comment on the database
+	comment, err := h.Service.PostComment(comment)
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
+	if err != nil {
+		fmt.Fprint(w, err)
+	}
 	if err := json.NewEncoder(w).Encode(comment); err != nil {
 		log.Panic(err)
 	}
@@ -115,11 +117,21 @@ func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 
 // UpdateComment - Update comment
 func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
-	comment, err := h.Service.UpdateComment(1, comment.Comment{
-		Slug: "/updated",
-	})
+	vars := mux.Vars(r)
+	id := vars["id"]
+	commentId, err := strconv.ParseUint(id, 10, 64)
+
+  // parsting of the request body
+  var newComment comment.Comment
+  if err := json.NewDecoder(r.Body).Decode(&newComment); err != nil{
+    w.WriteHeader(http.StatusBadRequest)
+    fmt.Fprint(w, "Failed to Decode JSON body")
+  }
+	
+  comment, err := h.Service.UpdateComment(uint(commentId), newComment)
 
 	if err != nil {
+    w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "Error updating the comment")
 	}
 
