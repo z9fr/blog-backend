@@ -2,14 +2,14 @@ package database
 
 import (
 	"fmt"
-	"os"
-  log "github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"os"
 )
 
 func NewDatabase() (*gorm.DB, error) {
-  log.Info("Setting up Database Connection")
+	log.Info("Setting up Database Connection")
 
 	dbUsername := os.Getenv("DB_USERNAME")
 	dbPassword := os.Getenv("DB_PASSWORD")
@@ -18,7 +18,7 @@ func NewDatabase() (*gorm.DB, error) {
 	dbPort := os.Getenv("DB_PORT")
 
 	connectionString := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", dbHost, dbPort, dbUsername, dbTable, dbPassword)
-  log.Info(connectionString)
+	log.Info(connectionString)
 
 	db, err := gorm.Open(postgres.Open(connectionString), &gorm.Config{})
 

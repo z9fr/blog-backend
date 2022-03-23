@@ -7,27 +7,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetComments(t *testing.T){
-  client := resty.New()
+func TestGetComments(t *testing.T) {
+	client := resty.New()
 
-  resp , err := client.R().Get(BASE_URL + "/api/comment")
+	resp, err := client.R().Get(BASE_URL + "/api/comment")
 
-  if err != nil{
-    t.Fail()
-  }
+	if err != nil {
+		t.Fail()
+	}
 
-  assert.Equal(t, 200 , resp.StatusCode())
+	assert.Equal(t, 200, resp.StatusCode())
 }
 
-func TestPostingComment(t *testing.T){
-  client := resty.New()
-  resp, err := client.R().
-  SetBody(`{"slug": "/", "author": "12345", "body": "hello world"}`).
-  Post(BASE_URL+"/api/comment/create")
+func TestPostingComment(t *testing.T) {
+	client := resty.New()
+	resp, err := client.R().
+		SetBody(`{"slug": "/", "author": "12345", "body": "hello world"}`).
+		Post(BASE_URL + "/api/comment/create")
 
-  if err != nil{
-    t.Fail()
-  }
+	if err != nil {
+		t.Fail()
+	}
 
-  assert.Equal(t , 200 , resp.StatusCode())
+	assert.Equal(t, 200, resp.StatusCode())
 }

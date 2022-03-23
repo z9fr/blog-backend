@@ -4,24 +4,24 @@ import (
 	"api/internal/comment"
 	"api/internal/database"
 	transportHttp "api/internal/transport/http"
-  log "github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
 // App -  Contain the application information
-type App struct{
-  Name string
-  Version string
+type App struct {
+	Name    string
+	Version string
 }
 
 // Run - handles the startup of our application
 func (app *App) Run() error {
-  log.SetFormatter(&log.JSONFormatter{})
-  log.WithFields(
-    log.Fields{
-      "AppName":app.Name, 
-      "AppVersion": app.Version,
-    }).Info("Setting up Application")
+	log.SetFormatter(&log.JSONFormatter{})
+	log.WithFields(
+		log.Fields{
+			"AppName":    app.Name,
+			"AppVersion": app.Version,
+		}).Info("Setting up Application")
 
 	db, err := database.NewDatabase()
 
@@ -31,8 +31,8 @@ func (app *App) Run() error {
 
 	err = database.MigrateDB(db)
 	if err != nil {
-    log.Error(err)
-    log.Fatal(err)
+		log.Error(err)
+		log.Fatal(err)
 		panic(err)
 	}
 
@@ -42,7 +42,7 @@ func (app *App) Run() error {
 	handler.SetupRotues()
 
 	if err := http.ListenAndServe(":4000", handler.Router); err != nil {
-    log.Error(err)
+		log.Error(err)
 		return err
 	}
 
@@ -53,13 +53,13 @@ func (app *App) Run() error {
 func main() {
 
 	app := App{
-    Name: "Comments-api",
-    Version: "1.0.0",
-  }
+		Name:    "Comments-api",
+		Version: "1.0.0",
+	}
 
 	if err := app.Run(); err != nil {
-    log.Error(err)
-    log.Fatal(err)
+		log.Error(err)
+		log.Fatal(err)
 	}
 
 }

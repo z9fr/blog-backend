@@ -3,7 +3,7 @@ package http
 import (
 	"api/internal/comment"
 	"encoding/json"
-  log "github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"net/http"
 	"strconv"
@@ -32,7 +32,7 @@ type Response struct {
 
 // SetupRoutes - sets up all the routes for our application
 func (h *Handler) SetupRotues() {
-  log.Info("Setting up routes")
+	log.Info("Setting up routes")
 
 	// initicate new gorilla mox router
 	h.Router = mux.NewRouter()
@@ -48,8 +48,8 @@ func (h *Handler) SetupRotues() {
 		if err := json.NewEncoder(w).Encode(Response{
 			Message: "Api is Running OK",
 		}); err != nil {
-      log.Fatal(err)
-      panic(err)
+			log.Fatal(err)
+			panic(err)
 		}
 	})
 }
@@ -74,9 +74,9 @@ func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  if err := sendOkResponse(w, comment); err != nil{
-    log.Error(err)
-  }
+	if err := sendOkResponse(w, comment); err != nil {
+		log.Error(err)
+	}
 }
 
 // GetAllComments - retriews all comments from the database
@@ -93,9 +93,9 @@ func (h *Handler) GetAllComments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  if err := sendOkResponse(w, comments); err != nil{
-    log.Error(err)
-  }
+	if err := sendOkResponse(w, comments); err != nil {
+		log.Error(err)
+	}
 }
 
 // PostComment - add a new comment
@@ -115,9 +115,9 @@ func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  if err := sendOkResponse(w, comment); err != nil{
-    log.Error(err)
-  }
+	if err := sendOkResponse(w, comment); err != nil {
+		log.Error(err)
+	}
 }
 
 // UpdateComment - Update comment
@@ -145,9 +145,9 @@ func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  if err := sendOkResponse(w, comment); err != nil{
-    log.Error(err)
-  }
+	if err := sendOkResponse(w, comment); err != nil {
+		log.Error(err)
+	}
 }
 
 // DeleteComment - Delete a comment by id
@@ -164,27 +164,27 @@ func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	err = h.Service.DeleteComment(uint(commentId))
 
 	if err != nil {
-    sendErrorResponse(w, "Failed to delete the comment", err)
+		sendErrorResponse(w, "Failed to delete the comment", err)
 	}
 
-  if err := sendOkResponse(w, Response{
+	if err := sendOkResponse(w, Response{
 		Message: "Successfully deleted the comment",
-	}); err != nil{
-    log.Error(err)
-  }
+	}); err != nil {
+		log.Error(err)
+	}
 }
 
-func sendOkResponse(w http.ResponseWriter, resp interface{}) error{
+func sendOkResponse(w http.ResponseWriter, resp interface{}) error {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-  w.WriteHeader(http.StatusOK)
-  return json.NewEncoder(w).Encode(resp)
+	w.WriteHeader(http.StatusOK)
+	return json.NewEncoder(w).Encode(resp)
 }
 
 func sendErrorResponse(w http.ResponseWriter, message string, err error) {
-  w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusInternalServerError)
-	
-  if err := json.NewEncoder(w).Encode(Response{
+
+	if err := json.NewEncoder(w).Encode(Response{
 		Message: message,
 		Error:   err.Error(),
 	}); err != nil {
