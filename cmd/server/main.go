@@ -16,7 +16,7 @@ type App struct {
 
 // Run - handles the startup of our application
 func (app *App) Run() error {
-	log.SetFormatter(&log.JSONFormatter{})
+	//log.SetFormatter(&log.JSONFormatter{})
 	log.WithFields(
 		log.Fields{
 			"AppName":    app.Name,
