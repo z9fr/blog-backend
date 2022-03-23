@@ -4,18 +4,24 @@ import (
 	"api/internal/comment"
 	"api/internal/database"
 	transportHttp "api/internal/transport/http"
-	"log"
+  log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
-// App - the struct which contains things like
-// pointers to database connections
-type App struct{}
+// App -  Contain the application information
+type App struct{
+  Name string
+  Version string
+}
 
 // Run - handles the startup of our application
 func (app *App) Run() error {
-
-	log.Printf("Setting up the API on http://localhost:4000")
+  log.SetFormatter(&log.JSONFormatter{})
+  log.WithFields(
+    log.Fields{
+      "AppName":app.Name, 
+      "AppVersion": app.Version,
+    }).Info("Setting up Application")
 
 	db, err := database.NewDatabase()
 
@@ -25,7 +31,9 @@ func (app *App) Run() error {
 
 	err = database.MigrateDB(db)
 	if err != nil {
-		log.Panic(err)
+    log.Error(err)
+    log.Fatal(err)
+		panic(err)
 	}
 
 	commentService := comment.NewService(db)
@@ -34,6 +42,7 @@ func (app *App) Run() error {
 	handler.SetupRotues()
 
 	if err := http.ListenAndServe(":4000", handler.Router); err != nil {
+    log.Error(err)
 		return err
 	}
 
@@ -43,11 +52,14 @@ func (app *App) Run() error {
 // Our main entrypoint for the application
 func main() {
 
-	app := App{}
+	app := App{
+    Name: "Comments-api",
+    Version: "1.0.0",
+  }
 
 	if err := app.Run(); err != nil {
-		log.Panicf("error running the API")
-		log.Panic(err)
+    log.Error(err)
+    log.Fatal(err)
 	}
 
 }

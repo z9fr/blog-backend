@@ -3,7 +3,8 @@ package http
 import (
 	"api/internal/comment"
 	"encoding/json"
-	"log"
+  log "github.com/sirupsen/logrus"
+
 	"net/http"
 	"strconv"
 
@@ -31,7 +32,7 @@ type Response struct {
 
 // SetupRoutes - sets up all the routes for our application
 func (h *Handler) SetupRotues() {
-	log.Printf("Setting up routes")
+  log.Info("Setting up routes")
 
 	// initicate new gorilla mox router
 	h.Router = mux.NewRouter()
@@ -47,7 +48,8 @@ func (h *Handler) SetupRotues() {
 		if err := json.NewEncoder(w).Encode(Response{
 			Message: "Api is Running OK",
 		}); err != nil {
-			log.Panic(err)
+      log.Fatal(err)
+      panic(err)
 		}
 	})
 }
@@ -73,7 +75,7 @@ func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
 	}
 
   if err := sendOkResponse(w, comment); err != nil{
-    log.Panic(err)
+    log.Error(err)
   }
 }
 
@@ -92,7 +94,7 @@ func (h *Handler) GetAllComments(w http.ResponseWriter, r *http.Request) {
 	}
 
   if err := sendOkResponse(w, comments); err != nil{
-    log.Panic(err)
+    log.Error(err)
   }
 }
 
@@ -114,7 +116,7 @@ func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 	}
 
   if err := sendOkResponse(w, comment); err != nil{
-    log.Panic(err)
+    log.Error(err)
   }
 }
 
@@ -144,7 +146,7 @@ func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
 	}
 
   if err := sendOkResponse(w, comment); err != nil{
-    log.Panic(err)
+    log.Error(err)
   }
 }
 
@@ -168,7 +170,7 @@ func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
   if err := sendOkResponse(w, Response{
 		Message: "Successfully deleted the comment",
 	}); err != nil{
-    log.Panic(err)
+    log.Error(err)
   }
 }
 
