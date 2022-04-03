@@ -3,6 +3,7 @@ package user
 import (
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/z9fr/blog-backend/internal/utils"
 	"gorm.io/gorm"
 )
@@ -13,10 +14,10 @@ type Service struct {
 
 type User struct {
 	gorm.Model
-	UserName string
-	Email    string
-	Password string
-	ID       string
+	UserName string `gorm:"column:username" json:"username"`
+	Email    string `gorm:"column:email" json:"email"`
+	Password string `gorm:"column:password" json:"password"`
+	ID       string `gorm:"primary_key;column:id" json:"id"`
 }
 
 // userSerive - the itnerface for our User Service
@@ -37,7 +38,7 @@ func NewService(db *gorm.DB) *Service {
 func (s *Service) GetUser(username string) (User, error) {
 	var user User
 
-	if result := s.DB.First(&user, username); result.Error != nil {
+	if result := s.DB.First(&user, "username = ?", username); result.Error != nil {
 		return User{}, result.Error
 	}
 
@@ -48,6 +49,7 @@ func (s *Service) GetUser(username string) (User, error) {
 func (s *Service) CreateUser(user User) (User, error) {
 
 	hashedPassword, err := utils.HashPassword(user.Password)
+	user.ID = uuid.NewString()
 
 	if err != nil {
 		return User{}, fmt.Errorf("Unable to hash user password %w", err)

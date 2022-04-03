@@ -64,6 +64,7 @@ func (h *Handler) SetupRotues() {
 
 	// users
 	h.Router.HandleFunc("/api/v1/user/{username}", h.GetUser).Methods("GET")
+	h.Router.HandleFunc("/api/v1/user/create", h.CreateUser).Methods("POST")
 
 	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
