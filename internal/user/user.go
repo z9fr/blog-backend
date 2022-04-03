@@ -3,6 +3,7 @@ package user
 import (
 	"fmt"
 
+	"github.com/z9fr/blog-backend/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -43,8 +44,22 @@ func (s *Service) GetUser(username string) (User, error) {
 	return user, nil
 }
 
+// Create a new User
 func (s *Service) CreateUser(user User) (User, error) {
-	return User{}, fmt.Errorf("not implemented")
+
+	hashedPassword, err := utils.HashPassword(user.Password)
+
+	if err != nil {
+		return User{}, fmt.Errorf("Unable to hash user password %w", err)
+	}
+
+	user.Password = hashedPassword
+
+	if result := s.DB.Save(&user); result.Error != nil {
+		return User{}, result.Error
+	}
+
+	return user, nil
 }
 
 func (s *Service) DeleteUser(ID string) error {
