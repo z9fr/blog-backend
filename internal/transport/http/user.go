@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/z9fr/blog-backend/internal/user"
@@ -42,13 +43,21 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	/*
 	   using the user service validate if the user is already availible
 	*/
-	var user user.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	var userinput user.User
+	if err := json.NewDecoder(r.Body).Decode(&userinput); err != nil {
 		sendErrorResponse(w, "Failed to decode JSON body", err)
 		return
 	}
 
-	createdUser, err := h.ServiceUser.CreateUser(user)
+	// check if username is taken
+	userCheck, err := h.ServiceUser.GetUser(userinput.UserName)
+
+	if userCheck.UserName == userinput.UserName {
+		sendErrorResponse(w, "Failed to Create the User", fmt.Errorf("User Name Alreay Taken"))
+		return
+	}
+
+	createdUser, err := h.ServiceUser.CreateUser(userinput)
 
 	if err != nil {
 		sendErrorResponse(w, "Failed to Create the User", err)
