@@ -6,14 +6,17 @@ import (
 
 	"github.com/z9fr/blog-backend/internal/post"
 
+	user "github.com/z9fr/blog-backend/internal/user"
+
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
 
 // Handler - store pointer to our comment service
 type Handler struct {
-	Router  *mux.Router
-	Service *post.Service
+	Router      *mux.Router
+	ServicePost *post.Service
+	ServiceUser *user.Service
 }
 
 // Response - an object to store responses from our api
@@ -23,9 +26,10 @@ type Response struct {
 }
 
 // NewHandler - return a pointer to a handler
-func NewHandler(service *post.Service) *Handler {
+func NewHandler(postservice *post.Service, userservice *user.Service) *Handler {
 	return &Handler{
-		Service: service,
+		ServicePost: postservice,
+		ServiceUser: userservice,
 	}
 }
 
@@ -51,11 +55,16 @@ func (h *Handler) SetupRotues() {
 	h.Router = mux.NewRouter()
 	h.Router.Use(LogginMiddleware)
 
+	// posts
 	h.Router.HandleFunc("/api/v1/posts", h.GetAllPosts).Methods("GET")
 	h.Router.HandleFunc("/api/v1/post/{id}", h.GetPost).Methods("GET")
 	h.Router.HandleFunc("/api/v1/post/create", h.CreatePost).Methods("POST")
 	h.Router.HandleFunc("/api/v1/post/delete/{id}", h.DeletePost).Methods("DELETE")
 	h.Router.HandleFunc("/api/v1/post/update/{id}", h.UpdatePost).Methods("PUT")
+
+	// users
+	h.Router.HandleFunc("/api/v1/user/{username}", h.GetUser).Methods("GET")
+	h.Router.HandleFunc("/api/v1/user/create", h.CreateUser).Methods("POST")
 
 	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
