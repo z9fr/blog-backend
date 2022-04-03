@@ -24,7 +24,7 @@ func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := h.Service.GetPost(uint(i))
+	post, err := h.ServicePost.GetPost(uint(i))
 
 	if err != nil {
 		sendErrorResponse(w, "Error Fetching post", err)
@@ -38,7 +38,7 @@ func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 
 // GetAllposts - retriews all posts from the database
 func (h *Handler) GetAllPosts(w http.ResponseWriter, r *http.Request) {
-	posts, err := h.Service.GetAllPosts()
+	posts, err := h.ServicePost.GetAllPosts()
 
 	if err != nil {
 		sendErrorResponse(w, "Failed to Fetch posts", err)
@@ -60,7 +60,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// saving the post on the database
-	post, err := h.Service.WritePost(post)
+	post, err := h.ServicePost.WritePost(post)
 
 	if err != nil {
 		sendErrorResponse(w, "Failed to Post the post", err)
@@ -90,7 +90,7 @@ func (h *Handler) UpdatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := h.Service.UpdatePost(uint(postId), newpost)
+	post, err := h.ServicePost.UpdatePost(uint(postId), newpost)
 
 	if err != nil {
 		sendErrorResponse(w, "Error updating the post", err)
@@ -113,7 +113,7 @@ func (h *Handler) DeletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.Service.DeletePost(uint(postId))
+	err = h.ServicePost.DeletePost(uint(postId))
 
 	if err != nil {
 		sendErrorResponse(w, "Failed to delete the post", err)

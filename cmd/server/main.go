@@ -7,6 +7,7 @@ import (
 	"github.com/z9fr/blog-backend/internal/database"
 	"github.com/z9fr/blog-backend/internal/post"
 	transportHttp "github.com/z9fr/blog-backend/internal/transport/http"
+	"github.com/z9fr/blog-backend/internal/user"
 )
 
 // App -  Contain the application information
@@ -38,8 +39,9 @@ func (app *App) Run() error {
 	}
 
 	postService := post.NewService(db)
+	userService := user.NewService(db)
 
-	handler := transportHttp.NewHandler(postService)
+	handler := transportHttp.NewHandler(postService, userService)
 	handler.SetupRotues()
 
 	if err := http.ListenAndServe(":4000", handler.Router); err != nil {
