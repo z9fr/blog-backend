@@ -1,10 +1,11 @@
 package http
 
 import (
-	"api/internal/post"
 	"encoding/json"
 	"net/http"
 	"strconv"
+
+	"github.com/z9fr/blog-backend/internal/post"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"

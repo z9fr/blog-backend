@@ -1,4 +1,4 @@
-module api
+module github.com/z9fr/blog-backend
 
 go 1.17
 

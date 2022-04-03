@@ -1,7 +1,7 @@
 package database
 
 import (
-	"api/internal/post"
+	"github.com/z9fr/blog-backend/internal/post"
 	"gorm.io/gorm"
 )
 

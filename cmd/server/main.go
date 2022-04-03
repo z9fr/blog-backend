@@ -1,11 +1,12 @@
 package main
 
 import (
-	"api/internal/post"
-	"api/internal/database"
-	transportHttp "api/internal/transport/http"
-	log "github.com/sirupsen/logrus"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/z9fr/blog-backend/internal/database"
+	"github.com/z9fr/blog-backend/internal/post"
+	transportHttp "github.com/z9fr/blog-backend/internal/transport/http"
 )
 
 // App -  Contain the application information
