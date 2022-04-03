@@ -1,7 +1,7 @@
 package main
 
 import (
-	"api/internal/comment"
+	"api/internal/post"
 	"api/internal/database"
 	transportHttp "api/internal/transport/http"
 	log "github.com/sirupsen/logrus"
@@ -36,9 +36,9 @@ func (app *App) Run() error {
 		panic(err)
 	}
 
-	commentService := comment.NewService(db)
+	postService := post.NewService(db)
 
-	handler := transportHttp.NewHandler(commentService)
+	handler := transportHttp.NewHandler(postService)
 	handler.SetupRotues()
 
 	if err := http.ListenAndServe(":4000", handler.Router); err != nil {
@@ -53,7 +53,7 @@ func (app *App) Run() error {
 func main() {
 
 	app := App{
-		Name:    "Comments-api",
+		Name:    "api-prod.dasith.works",
 		Version: "1.0.0",
 	}
 
