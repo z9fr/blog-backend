@@ -19,7 +19,7 @@ type Post struct {
 type PostService interface {
 	GetPost(ID uint) (Post, error)
 	GetPostsBySlug(slug string) ([]Post, error)
-	PostPost(Post Post) (Post, error)
+	WritePost(post Post) (Post, error)
 	UpdatePost(ID uint, newPost Post) (Post, error)
 	DeletePost(ID uint) error
 	GetAllPosts() ([]Post, error)
