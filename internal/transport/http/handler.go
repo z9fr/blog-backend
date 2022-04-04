@@ -54,6 +54,7 @@ func (h *Handler) SetupRotues() {
 	// initicate new gorilla mox router
 	h.Router = mux.NewRouter()
 	h.Router.Use(LogginMiddleware)
+	h.Router.Use(CORSMiddleware)
 
 	//  authenticated routes
 	authRoutes := h.Router.Methods(http.MethodPost, http.MethodGet, http.MethodPut, http.MethodDelete).Subrouter()
@@ -70,6 +71,8 @@ func (h *Handler) SetupRotues() {
 	authRoutes.HandleFunc("/api/v1/user/me", h.CurrentUser).Methods(http.MethodGet)
 
 	authRoutes.Use(AuthMiddleware)
+	authRoutes.Use(LogginMiddleware)
+	authRoutes.Use(CORSMiddleware)
 
 	// posts
 	h.Router.HandleFunc("/api/v1/posts", h.GetAllPosts).Methods("GET")
