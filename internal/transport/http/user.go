@@ -113,6 +113,8 @@ func (h *Handler) AuthUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Authorization", "bearer "+authtoken)
+
 	if err := sendOkResponse(w, authtoken); err != nil {
 		log.Error(err)
 	}
