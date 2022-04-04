@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/z9fr/blog-backend/internal/post"
 
 	user "github.com/z9fr/blog-backend/internal/user"
@@ -54,10 +55,16 @@ func (h *Handler) SetupRotues() {
 	// initicate new gorilla mox router
 	h.Router = mux.NewRouter()
 	h.Router.Use(LogginMiddleware)
-	h.Router.Use(CORSMiddleware)
+	//	h.Router.Use(CORSMiddleware)
+
+	headersOk := handlers.AllowedHeaders([]string{"Authorization"})
+	originsOk := handlers.AllowedOrigins([]string{"http://localhost:3000"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
+	h.Router.Use(handlers.CORS(originsOk, headersOk, methodsOk))
 
 	//  authenticated routes
-	authRoutes := h.Router.Methods(http.MethodPost, http.MethodGet, http.MethodPut, http.MethodDelete).Subrouter()
+	authRoutes := h.Router.Methods(http.MethodPost, http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodOptions).Subrouter()
 
 	// Services related to posts
 	authRoutes.HandleFunc("/api/v1/post/create", h.CreatePost).Methods(http.MethodPost)
@@ -66,11 +73,9 @@ func (h *Handler) SetupRotues() {
 
 	// Services realted to user
 	authRoutes.HandleFunc("/api/v1/user/create", h.CreateUser).Methods(http.MethodPost)
-	authRoutes.HandleFunc("/api/v1/user/me", h.CurrentUser).Methods(http.MethodGet)
+	authRoutes.HandleFunc("/api/v1/user/me", h.CurrentUser).Methods(http.MethodGet, http.MethodOptions)
 
 	authRoutes.Use(AuthMiddleware)
-	authRoutes.Use(LogginMiddleware)
-	authRoutes.Use(CORSMiddleware)
 
 	// posts
 	h.Router.HandleFunc("/api/v1/posts", h.GetAllPosts).Methods("GET")
