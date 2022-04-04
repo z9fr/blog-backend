@@ -12,9 +12,10 @@ import (
 )
 
 type UserResponse struct {
-	UserName string `json:"username"`
-	Email    string `json:"email"`
-	ID       string `json:"id"`
+	UserName    string `json:"username"`
+	Email       string `json:"email"`
+	ID          string `json:"id"`
+	Description string `json:"Description"`
 }
 
 // Get User by user name
@@ -30,9 +31,10 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := sendOkResponse(w, UserResponse{
-		UserName: u.UserName,
-		Email:    u.Email,
-		ID:       u.ID,
+		UserName:    u.UserName,
+		Email:       u.Email,
+		ID:          u.ID,
+		Description: u.Description,
 	}); err != nil {
 		log.Error(err)
 	}
@@ -65,9 +67,10 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := sendOkResponse(w, UserResponse{
-		UserName: createdUser.UserName,
-		Email:    createdUser.Email,
-		ID:       createdUser.ID,
+		UserName:    createdUser.UserName,
+		Email:       createdUser.Email,
+		ID:          createdUser.ID,
+		Description: createdUser.Description,
 	}); err != nil {
 		log.Error(err)
 	}
