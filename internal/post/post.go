@@ -23,7 +23,7 @@ type Post struct {
 	Model
 	Title  string `gorm:"column:title" json:"title"`
 	Text   string `gorm:"column:text" json:"text"`
-	Slug   string `gorm:"column:slug" json:"slug"`
+	Slug   string `gorm:"uniqueIndex:idx_first_second" json:"slug"`
 	Author string `gorm:"column:author" json:"author"`
 	Tags   []Tag  `gorm:"foreignKey:ID;references:ID" json:"tags"`
 }
