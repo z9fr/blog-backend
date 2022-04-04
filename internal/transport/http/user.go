@@ -101,7 +101,19 @@ func (h *Handler) AuthUser(w http.ResponseWriter, r *http.Request) {
 
 	math := utils.CheckPasswordHash(creds.Password, actualUser.Password)
 
-	if err := sendOkResponse(w, math); err != nil {
+	if !math {
+		sendErrorResponse(w, "Authentication Failure", fmt.Errorf("Invalid username or password"))
+		return
+	}
+
+	authtoken, err := utils.GenerateJWT(actualUser.UserName, actualUser.Email, actualUser.ID)
+
+	if err != nil {
+		sendErrorResponse(w, "Internal Server Error", fmt.Errorf("Failed to generate auth token %w", err))
+		return
+	}
+
+	if err := sendOkResponse(w, authtoken); err != nil {
 		log.Error(err)
 	}
 
