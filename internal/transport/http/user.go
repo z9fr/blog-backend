@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/z9fr/blog-backend/internal/user"
-
-	"github.com/z9fr/blog-backend/internal/utils"
-
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/z9fr/blog-backend/internal/user"
+	"github.com/z9fr/blog-backend/internal/utils"
 )
 
 type UserResponse struct {

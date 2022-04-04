@@ -55,17 +55,28 @@ func (h *Handler) SetupRotues() {
 	h.Router = mux.NewRouter()
 	h.Router.Use(LogginMiddleware)
 
+	//  authenticated routes
+	authRoutes := h.Router.Methods(http.MethodPost, http.MethodGet, http.MethodPut, http.MethodDelete).Subrouter()
+
+	// Services related to posts
+	authRoutes.HandleFunc("/api/v1/post/create", h.CreatePost).Methods(http.MethodPost)
+
+	authRoutes.HandleFunc("/api/test", h.GetAllPosts).Methods(http.MethodGet)
+	authRoutes.HandleFunc("/api/v1/post/delete/{id}", h.DeletePost).Methods(http.MethodDelete)
+	authRoutes.HandleFunc("/api/v1/post/update/{id}", h.UpdatePost).Methods(http.MethodPut)
+
+	// Services realted to user
+	authRoutes.HandleFunc("/api/v1/user/create", h.CreateUser).Methods(http.MethodPost)
+
+	authRoutes.Use(AuthMiddleware)
+
 	// posts
 	h.Router.HandleFunc("/api/v1/posts", h.GetAllPosts).Methods("GET")
 	h.Router.HandleFunc("/api/v1/post/{id}", h.GetPost).Methods("GET")
-	h.Router.HandleFunc("/api/v1/post/create", h.CreatePost).Methods("POST")
-	h.Router.HandleFunc("/api/v1/post/delete/{id}", h.DeletePost).Methods("DELETE")
-	h.Router.HandleFunc("/api/v1/post/update/{id}", h.UpdatePost).Methods("PUT")
 
 	// users
 	h.Router.HandleFunc("/api/v1/user/{username}", h.GetUser).Methods("GET")
-	h.Router.HandleFunc("/api/v1/user/create", h.CreateUser).Methods("POST")
-	h.Router.HandleFunc("/api/v1/user/auth", h.AuthUser).Methods("POST")
+	h.Router.HandleFunc("/api/v1/user/auth", h.AuthUser).Methods(http.MethodPost)
 
 	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
