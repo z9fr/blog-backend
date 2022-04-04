@@ -14,10 +14,11 @@ type Service struct {
 
 type User struct {
 	gorm.Model
-	UserName string `gorm:"column:username" json:"username"`
-	Email    string `gorm:"column:email" json:"email"`
-	Password string `gorm:"column:password" json:"password"`
-	ID       string `gorm:"primary_key;column:id" json:"id"`
+	UserName    string `gorm:"column:username;uniqueIndex:idx_username" json:"username"`
+	Description string `gorm:"column:description" json:"description"`
+	Email       string `gorm:"column:email;uniqueIndex:idx_email" json:"email"`
+	Password    string `gorm:"column:password" json:"password"`
+	ID          string `gorm:"primary_key;column:id" json:"id"`
 }
 
 // userSerive - the itnerface for our User Service

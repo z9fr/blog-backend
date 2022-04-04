@@ -7,14 +7,22 @@ import (
 
 	"github.com/z9fr/blog-backend/internal/user"
 
+	"github.com/z9fr/blog-backend/internal/utils"
+
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
 
 type UserResponse struct {
-	UserName string `json:"username"`
-	Email    string `json:"email"`
-	ID       string `json:"id"`
+	UserName    string `json:"username"`
+	Email       string `json:"email"`
+	ID          string `json:"id"`
+	Description string `json:"Description"`
+}
+
+type UserInputCreds struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 // Get User by user name
@@ -30,9 +38,10 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := sendOkResponse(w, UserResponse{
-		UserName: u.UserName,
-		Email:    u.Email,
-		ID:       u.ID,
+		UserName:    u.UserName,
+		Email:       u.Email,
+		ID:          u.ID,
+		Description: u.Description,
 	}); err != nil {
 		log.Error(err)
 	}
@@ -65,10 +74,47 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := sendOkResponse(w, UserResponse{
-		UserName: createdUser.UserName,
-		Email:    createdUser.Email,
-		ID:       createdUser.ID,
+		UserName:    createdUser.UserName,
+		Email:       createdUser.Email,
+		ID:          createdUser.ID,
+		Description: createdUser.Description,
 	}); err != nil {
 		log.Error(err)
 	}
+}
+
+// Authenticate User
+func (h *Handler) AuthUser(w http.ResponseWriter, r *http.Request) {
+	var creds UserInputCreds
+
+	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+		sendErrorResponse(w, "Failed to decode JSON body", err)
+		return
+	}
+
+	actualUser, err := h.ServiceUser.GetUser(creds.Username)
+
+	if err != nil {
+		sendErrorResponse(w, "Error Fetching User", err)
+		return
+	}
+
+	math := utils.CheckPasswordHash(creds.Password, actualUser.Password)
+
+	if !math {
+		sendErrorResponse(w, "Authentication Failure", fmt.Errorf("Invalid username or password"))
+		return
+	}
+
+	authtoken, err := utils.GenerateJWT(actualUser.UserName, actualUser.Email, actualUser.ID)
+
+	if err != nil {
+		sendErrorResponse(w, "Internal Server Error", fmt.Errorf("Failed to generate auth token %w", err))
+		return
+	}
+
+	if err := sendOkResponse(w, authtoken); err != nil {
+		log.Error(err)
+	}
+
 }
