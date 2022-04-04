@@ -67,6 +67,7 @@ func (h *Handler) SetupRotues() {
 
 	// Services realted to user
 	authRoutes.HandleFunc("/api/v1/user/create", h.CreateUser).Methods(http.MethodPost)
+	authRoutes.HandleFunc("/api/v1/user/me", h.CurrentUser).Methods(http.MethodGet)
 
 	authRoutes.Use(AuthMiddleware)
 

@@ -4,19 +4,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+
 	log "github.com/sirupsen/logrus"
 
+	"github.com/z9fr/blog-backend/internal/models"
 	"github.com/z9fr/blog-backend/internal/user"
 	"github.com/z9fr/blog-backend/internal/utils"
 )
 
 type UserResponse struct {
-	UserName    string `json:"username"`
-	Email       string `json:"email"`
-	ID          string `json:"id"`
-	Description string `json:"Description"`
+	UserName    string    `json:"username"`
+	Email       string    `json:"email"`
+	ID          string    `json:"id"`
+	Description string    `json:"Description"`
+	CreatedAt   time.Time `json:"CreatedAt"`
 }
 
 type UserInputCreds struct {
@@ -41,6 +46,7 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 		Email:       u.Email,
 		ID:          u.ID,
 		Description: u.Description,
+		CreatedAt:   u.CreatedAt,
 	}); err != nil {
 		log.Error(err)
 	}
@@ -77,6 +83,7 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		Email:       createdUser.Email,
 		ID:          createdUser.ID,
 		Description: createdUser.Description,
+		CreatedAt:   createdUser.CreatedAt,
 	}); err != nil {
 		log.Error(err)
 	}
@@ -118,4 +125,29 @@ func (h *Handler) AuthUser(w http.ResponseWriter, r *http.Request) {
 		log.Error(err)
 	}
 
+}
+
+// Current user - display information about the current /logged in user
+
+func (h *Handler) CurrentUser(w http.ResponseWriter, r *http.Request) {
+
+	token := context.Get(r, "token")
+	username := token.(models.AuthToken).Username
+
+	u, err := h.ServiceUser.GetUser(username)
+
+	if err != nil {
+		sendErrorResponse(w, "Failed to Fetch User", err)
+		return
+	}
+
+	if err := sendOkResponse(w, UserResponse{
+		UserName:    u.UserName,
+		Email:       u.Email,
+		ID:          u.ID,
+		Description: u.Description,
+		CreatedAt:   u.CreatedAt,
+	}); err != nil {
+		log.Error(err)
+	}
 }

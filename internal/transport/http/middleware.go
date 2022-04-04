@@ -8,13 +8,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/context"
+	"github.com/z9fr/blog-backend/internal/models"
 )
-
-type AuthToken struct {
-	Username string
-	Email    string
-	Uuid     string
-}
 
 // Auth Middleware - a middleware to validate user authentication
 func AuthMiddleware(next http.Handler) http.Handler {
@@ -44,7 +39,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 		claims, _ := token.Claims.(jwt.MapClaims)
 
-		var decodedToken AuthToken
+		var decodedToken models.AuthToken
 
 		for key, val := range claims {
 			val := fmt.Sprintf("%v", val)
