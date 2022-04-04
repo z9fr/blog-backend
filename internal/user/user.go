@@ -65,6 +65,7 @@ func (s *Service) CreateUser(user User) (User, error) {
 	return user, nil
 }
 
+// delete user - deletes a user using given id
 func (s *Service) DeleteUser(ID string) error {
 	return fmt.Errorf("not implemented")
 }
