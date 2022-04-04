@@ -44,7 +44,7 @@ type Tag struct {
 // PostService - the itnerface for our Post service
 type PostService interface {
 	GetPost(ID uint) (Post, error)
-	GetPostsBySlug(slug string) ([]Post, error)
+	GetPostBySlug(slug string) (Post, error)
 	WritePost(post Post) (Post, error)
 	UpdatePost(ID uint, newPost Post) (Post, error)
 	DeletePost(ID uint) error
@@ -74,14 +74,14 @@ func (s *Service) GetPost(ID uint) (Post, error) {
 }
 
 // GetPostsBySlug - retrieves all Posts by slug ( path - /article/name )
-func (s *Service) GetPostsBySlug(slug string) ([]Post, error) {
-	var posts []Post
+func (s *Service) GetPostBySlug(slug string) (Post, error) {
+	var post Post
 
-	if result := s.DB.Find(&posts).Where("slug =?", slug); result.Error != nil {
-		return []Post{}, result.Error
+	if result := s.DB.First(&post).Where("slug =?", slug); result.Error != nil {
+		return Post{}, result.Error
 	}
 
-	return posts, nil
+	return post, nil
 
 }
 

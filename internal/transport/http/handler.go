@@ -61,8 +61,6 @@ func (h *Handler) SetupRotues() {
 
 	// Services related to posts
 	authRoutes.HandleFunc("/api/v1/post/create", h.CreatePost).Methods(http.MethodPost)
-
-	authRoutes.HandleFunc("/api/test", h.GetAllPosts).Methods(http.MethodGet)
 	authRoutes.HandleFunc("/api/v1/post/delete/{id}", h.DeletePost).Methods(http.MethodDelete)
 	authRoutes.HandleFunc("/api/v1/post/update/{id}", h.UpdatePost).Methods(http.MethodPut)
 
@@ -77,6 +75,7 @@ func (h *Handler) SetupRotues() {
 	// posts
 	h.Router.HandleFunc("/api/v1/posts", h.GetAllPosts).Methods("GET")
 	h.Router.HandleFunc("/api/v1/post/{id}", h.GetPost).Methods("GET")
+	h.Router.HandleFunc("/api/v1/post/f/{slug}", h.GetPostBySlug).Methods("GET")
 
 	// users
 	h.Router.HandleFunc("/api/v1/user/{username}", h.GetUser).Methods("GET")

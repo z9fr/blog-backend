@@ -36,6 +36,22 @@ func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Getpost - Retriew Based on Slug
+func (h *Handler) GetPostBySlug(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+
+	post, err := h.ServicePost.GetPostBySlug(slug)
+	if err != nil {
+		sendErrorResponse(w, "Error Fetching post", err)
+		return
+	}
+
+	if err := sendOkResponse(w, post); err != nil {
+		log.Error(err)
+	}
+}
+
 // GetAllposts - retriews all posts from the database
 func (h *Handler) GetAllPosts(w http.ResponseWriter, r *http.Request) {
 	posts, err := h.ServicePost.GetAllPosts()
