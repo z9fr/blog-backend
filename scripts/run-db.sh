@@ -1,4 +1,4 @@
-docker run --name tutorialede-restapi-v1 -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
+docker run --name blogdb-v1 -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
 
   
 export DB_USERNAME=postgres

@@ -8,7 +8,7 @@ import (
 
 func MigrateDB(db *gorm.DB) error {
 	// MigrateDB - migrates our database and create our comment tables
-	if err := db.AutoMigrate(&post.Post{}, &user.User{}); err != nil {
+	if err := db.AutoMigrate(&post.Post{}, &user.User{}, &post.Tag{}); err != nil {
 		return err
 	}
 	return nil

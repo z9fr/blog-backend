@@ -1,18 +1,44 @@
 package post
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // Service - our Post service
 type Service struct {
 	DB *gorm.DB
 }
 
-// Comment
+// Model definition same as gorm.Model, but including column and json tags
+type Model struct {
+	ID        uint       `gorm:"primary_key;column:id" json:"id"`
+	CreatedAt time.Time  `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt time.Time  `gorm:"column:updated_at" json:"updated_at"`
+	DeletedAt *time.Time `gorm:"column:deleted_at" json:"deleted_at"`
+}
+
 type Post struct {
-	gorm.Model
-	Slug   string
-	Body   string
-	Author string
+	Model
+	Title  string `gorm:"column:title" json:"title"`
+	Text   string `gorm:"column:text" json:"text"`
+	Slug   string `gorm:"column:slug" json:"slug"`
+	Author string `gorm:"column:author" json:"author"`
+	Tags   []Tag  `gorm:"foreignKey:ID;references:ID" json:"tags"`
+}
+
+/*
+* issue
+
+there's a bug with tags and this relationship is not correct. fix this later
+*/
+
+// Tag of Blog Post (hashtag)
+type Tag struct {
+	Model
+	PostID uint   `gorm:"type:int" json:"post_id"`
+	Name   string `gorm:"column:name" json:"name"`
 }
 
 // PostService - the itnerface for our Post service
@@ -35,9 +61,13 @@ func NewService(db *gorm.DB) *Service {
 // GetPost - return a Post by ID
 func (s *Service) GetPost(ID uint) (Post, error) {
 	var post Post
+	err := s.DB.Where("id = ?", ID).
+		Preload("Tags").
+		Find(&post).
+		Error
 
-	if result := s.DB.First(&post, ID); result.Error != nil {
-		return Post{}, result.Error
+	if err != nil {
+		return Post{}, nil
 	}
 
 	return post, nil
@@ -57,7 +87,7 @@ func (s *Service) GetPostsBySlug(slug string) ([]Post, error) {
 
 // Create Post - Create a new Post to the database
 func (s *Service) WritePost(post Post) (Post, error) {
-	if result := s.DB.Save(&post); result.Error != nil {
+	if result := s.DB.Create(&post); result.Error != nil {
 		return Post{}, result.Error
 	}
 
