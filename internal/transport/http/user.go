@@ -7,6 +7,8 @@ import (
 
 	"github.com/z9fr/blog-backend/internal/user"
 
+	"github.com/z9fr/blog-backend/internal/utils"
+
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
@@ -16,6 +18,11 @@ type UserResponse struct {
 	Email       string `json:"email"`
 	ID          string `json:"id"`
 	Description string `json:"Description"`
+}
+
+type UserInputCreds struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 // Get User by user name
@@ -74,4 +81,28 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}); err != nil {
 		log.Error(err)
 	}
+}
+
+// Authenticate User
+func (h *Handler) AuthUser(w http.ResponseWriter, r *http.Request) {
+	var creds UserInputCreds
+
+	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+		sendErrorResponse(w, "Failed to decode JSON body", err)
+		return
+	}
+
+	actualUser, err := h.ServiceUser.GetUser(creds.Username)
+
+	if err != nil {
+		sendErrorResponse(w, "Error Fetching User", err)
+		return
+	}
+
+	math := utils.CheckPasswordHash(creds.Password, actualUser.Password)
+
+	if err := sendOkResponse(w, math); err != nil {
+		log.Error(err)
+	}
+
 }
