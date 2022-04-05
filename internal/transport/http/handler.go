@@ -54,26 +54,26 @@ func (h *Handler) SetupRotues() {
 	// initicate new gorilla mox router
 	h.Router = mux.NewRouter()
 	h.Router.Use(LogginMiddleware)
+	h.Router.Use(CORSMiddleware)
 
 	//  authenticated routes
-	authRoutes := h.Router.Methods(http.MethodPost, http.MethodGet, http.MethodPut, http.MethodDelete).Subrouter()
+	authRoutes := h.Router.Methods(http.MethodPost, http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodOptions).Subrouter()
 
 	// Services related to posts
-	authRoutes.HandleFunc("/api/v1/post/create", h.CreatePost).Methods(http.MethodPost)
-
-	authRoutes.HandleFunc("/api/test", h.GetAllPosts).Methods(http.MethodGet)
+	authRoutes.HandleFunc("/api/v1/post/create", h.CreatePost).Methods(http.MethodPost, http.MethodOptions)
 	authRoutes.HandleFunc("/api/v1/post/delete/{id}", h.DeletePost).Methods(http.MethodDelete)
 	authRoutes.HandleFunc("/api/v1/post/update/{id}", h.UpdatePost).Methods(http.MethodPut)
 
 	// Services realted to user
 	authRoutes.HandleFunc("/api/v1/user/create", h.CreateUser).Methods(http.MethodPost)
-	authRoutes.HandleFunc("/api/v1/user/me", h.CurrentUser).Methods(http.MethodGet)
+	authRoutes.HandleFunc("/api/v1/user/me", h.CurrentUser).Methods(http.MethodGet, http.MethodOptions)
 
 	authRoutes.Use(AuthMiddleware)
 
 	// posts
 	h.Router.HandleFunc("/api/v1/posts", h.GetAllPosts).Methods("GET")
 	h.Router.HandleFunc("/api/v1/post/{id}", h.GetPost).Methods("GET")
+	h.Router.HandleFunc("/api/v1/post/f/{slug}", h.GetPostBySlug).Methods("GET")
 
 	// users
 	h.Router.HandleFunc("/api/v1/user/{username}", h.GetUser).Methods("GET")
