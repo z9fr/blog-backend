@@ -68,6 +68,12 @@ func (h *Handler) GetAllPosts(w http.ResponseWriter, r *http.Request) {
 
 // create post - add a new post
 func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "OPTIONS" {
+		log.Debug("Options requests")
+		sendOkResponse(w, "options")
+		return
+	}
+
 	var post post.Post
 	// getting the post from request body
 	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
