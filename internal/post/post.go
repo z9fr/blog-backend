@@ -1,8 +1,10 @@
 package post
 
 import (
+	"encoding/base64"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -83,7 +85,10 @@ func (s *Service) GetPostBySlug(slug string) (Post, error) {
 		Error
 
 	if err != nil {
-		return Post{}, nil
+		return Post{}, err
+	} else if post.Text == "" {
+		fakepost := createFakePost()
+		return fakepost, err
 	}
 	return post, nil
 
@@ -142,4 +147,27 @@ func (s *Service) GetLimitedPosts(count uint) ([]Post, error) {
 	}
 
 	return posts, nil
+}
+
+func createFakePost() Post {
+
+	postctx := `
+# oh.. i cant find that post.
+
+this post is missing. we lost it :( 
+but hey! we got a flag for you!!!
+
+here's your flag :) : <code class="inlineCode"> flag{` + uuid.NewString() + `} </code>`
+
+	postbody := base64.StdEncoding.EncodeToString([]byte(postctx))
+
+	post := Post{
+		Title:  "Not Found",
+		Slug:   "404-not-found",
+		Text:   postbody,
+		Author: "ghost",
+	}
+
+	return post
+
 }
