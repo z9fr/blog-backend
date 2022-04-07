@@ -74,7 +74,7 @@ func (h *Handler) SetupRotues() {
 	h.Router.HandleFunc("/api/v1/posts", h.GetAllPosts).Methods("GET")
 	h.Router.HandleFunc("/api/v1/post/{id}", h.GetPost).Methods("GET")
 	h.Router.HandleFunc("/api/v1/post/f/{slug}", h.GetPostBySlug).Methods("GET")
-	h.Router.HandleFunc("/api/v1/posts/{count}", h.GetPostByLimt).Methods(http.MethodGet)
+	h.Router.HandleFunc("/api/v1/post/limt/{count}", h.GetPostByLimt).Methods(http.MethodGet)
 
 	// just made this rouer unauth just for local testing.
 	h.Router.HandleFunc("/api/v1/user/create", h.CreateUser).Methods(http.MethodPost)
