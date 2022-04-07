@@ -52,6 +52,28 @@ func (h *Handler) GetPostBySlug(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Getpost - Retriew post by ID
+func (h *Handler) GetPostByLimt(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["count"] // this is a string but id is uint so we need to convert
+	i, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		sendErrorResponse(w, "Enable to parse UINT from ID ", err)
+		return
+	}
+	posts, err := h.ServicePost.GetLimitedPosts(uint(i))
+
+	if err != nil {
+		sendErrorResponse(w, "failed to fetch posts", err)
+		return
+	}
+
+	if err := sendOkResponse(w, posts); err != nil {
+		log.Error(err)
+	}
+
+}
+
 // GetAllposts - retriews all posts from the database
 func (h *Handler) GetAllPosts(w http.ResponseWriter, r *http.Request) {
 	posts, err := h.ServicePost.GetAllPosts()

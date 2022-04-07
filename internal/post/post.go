@@ -49,6 +49,7 @@ type PostService interface {
 	UpdatePost(ID uint, newPost Post) (Post, error)
 	DeletePost(ID uint) error
 	GetAllPosts() ([]Post, error)
+	GetLimitedPosts(count uint) ([]Post, error)
 }
 
 // NewService - return a new Post service
@@ -119,12 +120,23 @@ func (s *Service) DeletePost(ID uint) error {
 	return nil
 }
 
-// Delete Post - deletes a Post from the database by ID
+// Get all Posts - gets all the posts
 func (s *Service) GetAllPosts() ([]Post, error) {
 	var posts []Post
 
 	if result := s.DB.Find(&posts); result.Error != nil {
 		return []Post{}, result.Error
 	}
+	return posts, nil
+}
+
+// Get posts landing - get post information for a landing page with a limit
+func (s *Service) GetLimitedPosts(count uint) ([]Post, error) {
+	var posts []Post
+
+	if result := s.DB.Limit(int(count)).Find(&posts); result.Error != nil {
+		return []Post{}, result.Error
+	}
+
 	return posts, nil
 }
