@@ -77,11 +77,14 @@ func (s *Service) GetPost(ID uint) (Post, error) {
 // GetPostsBySlug - retrieves all Posts by slug ( path - /article/name )
 func (s *Service) GetPostBySlug(slug string) (Post, error) {
 	var post Post
+	err := s.DB.Where("slug = ?", slug).
+		Preload("Tags").
+		Find(&post).
+		Error
 
-	if result := s.DB.First(&post).Where("slug =?", slug); result.Error != nil {
-		return Post{}, result.Error
+	if err != nil {
+		return Post{}, nil
 	}
-
 	return post, nil
 
 }
