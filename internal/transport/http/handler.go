@@ -65,7 +65,7 @@ func (h *Handler) SetupRotues() {
 	authRoutes.HandleFunc("/api/v1/post/update/{id}", h.UpdatePost).Methods(http.MethodPut)
 
 	// Services realted to user
-	authRoutes.HandleFunc("/api/v1/user/create", h.CreateUser).Methods(http.MethodPost)
+	//authRoutes.HandleFunc("/api/v1/user/create", h.CreateUser).Methods(http.MethodPost)
 	authRoutes.HandleFunc("/api/v1/user/me", h.CurrentUser).Methods(http.MethodGet, http.MethodOptions)
 
 	authRoutes.Use(AuthMiddleware)
@@ -74,6 +74,10 @@ func (h *Handler) SetupRotues() {
 	h.Router.HandleFunc("/api/v1/posts", h.GetAllPosts).Methods("GET")
 	h.Router.HandleFunc("/api/v1/post/{id}", h.GetPost).Methods("GET")
 	h.Router.HandleFunc("/api/v1/post/f/{slug}", h.GetPostBySlug).Methods("GET")
+	h.Router.HandleFunc("/api/v1/post/limt/{count}", h.GetPostByLimt).Methods("GET")
+
+	// just made this rouer unauth just for local testing.
+	h.Router.HandleFunc("/api/v1/user/create", h.CreateUser).Methods(http.MethodPost)
 
 	// users
 	h.Router.HandleFunc("/api/v1/user/{username}", h.GetUser).Methods("GET")

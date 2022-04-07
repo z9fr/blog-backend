@@ -1,8 +1,10 @@
 package post
 
 import (
+	"encoding/base64"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -49,6 +51,7 @@ type PostService interface {
 	UpdatePost(ID uint, newPost Post) (Post, error)
 	DeletePost(ID uint) error
 	GetAllPosts() ([]Post, error)
+	GetLimitedPosts(count uint) ([]Post, error)
 }
 
 // NewService - return a new Post service
@@ -76,11 +79,17 @@ func (s *Service) GetPost(ID uint) (Post, error) {
 // GetPostsBySlug - retrieves all Posts by slug ( path - /article/name )
 func (s *Service) GetPostBySlug(slug string) (Post, error) {
 	var post Post
+	err := s.DB.Where("slug = ?", slug).
+		Preload("Tags").
+		Find(&post).
+		Error
 
-	if result := s.DB.First(&post).Where("slug =?", slug); result.Error != nil {
-		return Post{}, result.Error
+	if err != nil {
+		return Post{}, err
+	} else if post.Text == "" {
+		fakepost := createFakePost()
+		return fakepost, err
 	}
-
 	return post, nil
 
 }
@@ -119,7 +128,7 @@ func (s *Service) DeletePost(ID uint) error {
 	return nil
 }
 
-// Delete Post - deletes a Post from the database by ID
+// Get all Posts - gets all the posts
 func (s *Service) GetAllPosts() ([]Post, error) {
 	var posts []Post
 
@@ -127,4 +136,38 @@ func (s *Service) GetAllPosts() ([]Post, error) {
 		return []Post{}, result.Error
 	}
 	return posts, nil
+}
+
+// Get posts landing - get post information for a landing page with a limit
+func (s *Service) GetLimitedPosts(count uint) ([]Post, error) {
+	var posts []Post
+
+	if result := s.DB.Limit(int(count)).Find(&posts); result.Error != nil {
+		return []Post{}, result.Error
+	}
+
+	return posts, nil
+}
+
+func createFakePost() Post {
+
+	postctx := `
+# oh.. i cant find that post.
+
+this post is missing. we lost it :( 
+but hey! we got a flag for you!!!
+
+here's your flag :) : <code class="inlineCode"> flag{` + uuid.NewString() + `} </code>`
+
+	postbody := base64.StdEncoding.EncodeToString([]byte(postctx))
+
+	post := Post{
+		Title:  "Not Found",
+		Slug:   "404-not-found",
+		Text:   postbody,
+		Author: "ghost",
+	}
+
+	return post
+
 }
