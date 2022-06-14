@@ -4,114 +4,72 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/z9fr/blog-backend/internal/post"
-
-	user "github.com/z9fr/blog-backend/internal/user"
-
-	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
-// Handler - store pointer to our comment service
 type Handler struct {
-	Router      *mux.Router
-	ServicePost *post.Service
-	ServiceUser *user.Service
+	// service and router
+	Router *chi.Mux
 }
 
-// Response - an object to store responses from our api
-type Response struct {
-	Message string
-	Error   string
+// NewHandler -  construcutre to create and return a pointer to a handler
+func NewHandler() *Handler {
+	return &Handler{}
 }
 
-// NewHandler - return a pointer to a handler
-func NewHandler(postservice *post.Service, userservice *user.Service) *Handler {
-	return &Handler{
-		ServicePost: postservice,
-		ServiceUser: userservice,
-	}
-}
-
-// LoggingMiddleware - a handy middleware function that logs out incoming requests
-func LogginMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.WithFields(
-			log.Fields{
-				"Method": r.Method,
-				"Path":   r.URL.Path,
-				"Host":   r.RemoteAddr,
-			}).
-			Info("handled request")
-		next.ServeHTTP(w, r)
-	})
-}
-
-// SetupRoutes - sets up all the routes for our application
 func (h *Handler) SetupRotues() {
-	log.Info("Setting up routes")
+	h.Router = chi.NewRouter()
 
-	// initicate new gorilla mox router
-	h.Router = mux.NewRouter()
-	h.Router.Use(LogginMiddleware)
-	h.Router.Use(CORSMiddleware)
+	// logs the start and end of each request, along with some useful data about what was requested,
+	// what the response status was, and how long it took to return. When standard output is a TTY,
+	// Logger will print in color, otherwise it will print in black and white. Logger prints a request ID if one is provided.
+	h.Router.Use(middleware.Logger)
 
-	//  authenticated routes
-	authRoutes := h.Router.Methods(http.MethodPost, http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodOptions).Subrouter()
+	// clean out double slash mistakes from a user's request path.
+	// For example, if a user requests /users//1 or //users////1 will both be treated as: /users/1
+	h.Router.Use(middleware.CleanPath)
 
-	// Services related to posts
-	authRoutes.HandleFunc("/api/v1/post/create", h.CreatePost).Methods(http.MethodPost, http.MethodOptions)
-	authRoutes.HandleFunc("/api/v1/post/delete/{id}", h.DeletePost).Methods(http.MethodDelete)
-	authRoutes.HandleFunc("/api/v1/post/update/{id}", h.UpdatePost).Methods(http.MethodPut)
+	// automatically route undefined HEAD requests to GET handlers.
+	h.Router.Use(middleware.GetHead)
 
-	// Services realted to user
-	//authRoutes.HandleFunc("/api/v1/user/create", h.CreateUser).Methods(http.MethodPost)
-	authRoutes.HandleFunc("/api/v1/user/me", h.CurrentUser).Methods(http.MethodGet, http.MethodOptions)
+	// recovers from panics, logs the panic (and a backtrace),
+	// returns a HTTP 500 (Internal Server Error) status if possible. Recoverer prints a request ID if one is provided.
+	h.Router.Use(middleware.Recoverer)
 
-	authRoutes.Use(AuthMiddleware)
+	h.Router.Route("/api/v2", func(r chi.Router) {
 
-	// posts
-	h.Router.HandleFunc("/api/v1/posts", h.GetAllPosts).Methods("GET")
-	h.Router.HandleFunc("/api/v1/post/{id}", h.GetPost).Methods("GET")
-	h.Router.HandleFunc("/api/v1/post/f/{slug}", h.GetPostBySlug).Methods("GET")
-	h.Router.HandleFunc("/api/v1/post/limt/{count}", h.GetPostByLimt).Methods("GET")
+		r.Use(cors.Handler(cors.Options{
+			// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+			AllowedOrigins: []string{"https://*", "http://*"},
+			// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+			ExposedHeaders:   []string{"Link"},
+			AllowCredentials: false,
+			MaxAge:           300, // Maximum value not ignored by any of major browsers
+		}))
 
-	// just made this rouer unauth just for local testing.
-	// h.Router.HandleFunc("/api/v1/user/create", h.CreateUser).Methods(http.MethodPost)
+		r.Get("/", TestRoute)
 
-	// users
-	h.Router.HandleFunc("/api/v1/user/{username}", h.GetUser).Methods("GET")
-	h.Router.HandleFunc("/api/v1/user/auth", h.AuthUser).Methods(http.MethodPost)
+		/* handle errors */
 
-	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(Response{
-			Message: "Api is Running OK",
-		}); err != nil {
-			log.Fatal(err)
-			panic(err)
-		}
+		h.Router.NotFound(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]interface{}{"error": "route not found"})
+		})
+
+		h.Router.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			json.NewEncoder(w).Encode(map[string]interface{}{"error": "method is not valid"})
+		})
 	})
-
 }
 
-// handle ok responses
-func sendOkResponse(w http.ResponseWriter, resp interface{}) error {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	return json.NewEncoder(w).Encode(resp)
-}
-
-// handle error responses
-func sendErrorResponse(w http.ResponseWriter, message string, err error) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusInternalServerError)
-
-	if err := json.NewEncoder(w).Encode(Response{
-		Message: message,
-		Error:   err.Error(),
-	}); err != nil {
-		panic(err)
-	}
+func TestRoute(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("flag{flag}"))
+	return
 }
