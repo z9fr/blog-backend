@@ -4,11 +4,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/z9fr/blog-backend/internal/database"
 	performancedb "github.com/z9fr/blog-backend/internal/performanceDb"
 	"github.com/z9fr/blog-backend/internal/post"
 	transportHttp "github.com/z9fr/blog-backend/internal/transport/http"
+	"github.com/z9fr/blog-backend/internal/utils"
 )
 
 type App struct {
@@ -18,9 +20,17 @@ type App struct {
 }
 
 var startTime time.Time
+var ApplicationSecret string
 
 func init() {
 	startTime = time.Now()
+	secret, err := utils.SecretGenerator(100)
+
+	if err != nil {
+		logrus.Panic("Unable to generate the secret", err)
+	}
+
+	ApplicationSecret = secret
 }
 
 func (app *App) Run() error {
@@ -28,6 +38,7 @@ func (app *App) Run() error {
 		log.Fields{
 			"AppName":    app.Name,
 			"AppVersion": app.Version,
+			"AppSecret":  ApplicationSecret,
 		}).Info("Setting up Application")
 
 	// setup the database
@@ -47,7 +58,7 @@ func (app *App) Run() error {
 	dbstatus := performancedb.NewService(db)
 
 	// setup the routes and http handler
-	handler := transportHttp.NewHandler(postservice, dbstatus, app.IsProd, startTime)
+	handler := transportHttp.NewHandler(postservice, dbstatus, app.IsProd, startTime, ApplicationSecret)
 	handler.SetupRotues()
 
 	if err := http.ListenAndServe(":4000", handler.Router); err != nil {
