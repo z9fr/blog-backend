@@ -1,10 +1,12 @@
 package main
 
 import (
+	"net/http"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/z9fr/blog-backend/internal/database"
+	"github.com/z9fr/blog-backend/internal/post"
 	transportHttp "github.com/z9fr/blog-backend/internal/transport/http"
-	"net/http"
 )
 
 type App struct {
@@ -32,8 +34,10 @@ func (app *App) Run() error {
 		return err
 	}
 
+	postservice := post.NewService(db)
+
 	// setup the routes and http handler
-	handler := transportHttp.NewHandler()
+	handler := transportHttp.NewHandler(postservice)
 	handler.SetupRotues()
 
 	if err := http.ListenAndServe(":4000", handler.Router); err != nil {

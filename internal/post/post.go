@@ -1,6 +1,7 @@
 package post
 
 import (
+	"github.com/z9fr/blog-backend/internal/types"
 	"gorm.io/gorm"
 )
 
@@ -13,6 +14,17 @@ type Service struct {
 }
 
 type PostService interface {
+	// create
+	CreatePost(post types.Post) (types.Post, error)
+
+	// fetch
+	GetAllPosts() []*types.Post
+	GetPostsBySlug(slug string) types.Post
+	GetAllUnPublishedPosts() []*types.Post
+
+	// validations
+	IsTitleTaken(title string) bool
+	IsSlugTaken(slug string) bool
 }
 
 // NewService - create a instance of this service and return

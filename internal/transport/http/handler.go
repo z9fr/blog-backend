@@ -3,20 +3,27 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/z9fr/blog-backend/internal/post"
+
+	"github.com/go-chi/httprate"
 )
 
 type Handler struct {
 	// service and router
-	Router *chi.Mux
+	Router      *chi.Mux
+	PostService *post.Service
 }
 
 // NewHandler -  construcutre to create and return a pointer to a handler
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(postservice *post.Service) *Handler {
+	return &Handler{
+		PostService: postservice,
+	}
 }
 
 func (h *Handler) SetupRotues() {
@@ -31,12 +38,40 @@ func (h *Handler) SetupRotues() {
 	// For example, if a user requests /users//1 or //users////1 will both be treated as: /users/1
 	h.Router.Use(middleware.CleanPath)
 
+	// RedirectSlashes is a middleware that will match request paths with a trailing slash
+	// and redirect to the same path, less the trailing slash.
+	h.Router.Use(middleware.RedirectSlashes)
+
 	// automatically route undefined HEAD requests to GET handlers.
 	h.Router.Use(middleware.GetHead)
+
+	// Throttle is a middleware that limits number of currently processed requests at a time
+	// across all users. Note: Throttle is not a rate-limiter per user, instead it just puts a
+	// ceiling on the number of currentl in-flight requests being processed from the point
+	// from where the Throttle middleware is mounted.
+	h.Router.Use(middleware.Throttle(15))
+
+	// ThrottleBacklog is a middleware that limits number of currently processed requests
+	// at a time and provides a backlog for holding a finite number of pending requests
+	h.Router.Use(middleware.ThrottleBacklog(10, 50, time.Second*10))
+
+	// timeout middleware
+	h.Router.Use(middleware.Timeout(time.Second * 60))
 
 	// recovers from panics, logs the panic (and a backtrace),
 	// returns a HTTP 500 (Internal Server Error) status if possible. Recoverer prints a request ID if one is provided.
 	h.Router.Use(middleware.Recoverer)
+
+	// RealIP is a middleware that sets a http.Request's RemoteAddr to the results of parsing either
+	// the X-Real-IP header or the X-Forwarded-For header (in that order).
+	h.Router.Use(middleware.RealIP)
+
+	// Enable httprate request limiter of 100 requests per minute.
+	//
+	// rate-limiting is bound to the request IP address via the LimitByIP middleware handler.
+	//
+	// To have a single rate-limiter for all requests, use httprate.LimitAll(..).
+	h.Router.Use(httprate.LimitByIP(100, 1*time.Minute))
 
 	h.Router.Route("/api/v2", func(r chi.Router) {
 
@@ -51,7 +86,8 @@ func (h *Handler) SetupRotues() {
 			MaxAge:           300, // Maximum value not ignored by any of major browsers
 		}))
 
-		r.Get("/", TestRoute)
+		r.Get("/posts", h.FetchallPosts)
+		r.Get("/post/{slug}", h.FetcheventbySlug)
 
 		/* handle errors */
 
