@@ -12,6 +12,7 @@ import (
 type App struct {
 	Name    string
 	Version string
+	IsProd  bool
 }
 
 func (app *App) Run() error {
@@ -37,7 +38,7 @@ func (app *App) Run() error {
 	postservice := post.NewService(db)
 
 	// setup the routes and http handler
-	handler := transportHttp.NewHandler(postservice)
+	handler := transportHttp.NewHandler(postservice, app.IsProd)
 	handler.SetupRotues()
 
 	if err := http.ListenAndServe(":4000", handler.Router); err != nil {
@@ -51,6 +52,7 @@ func main() {
 	app := App{
 		Name:    "api.z9fr.xyz",
 		Version: "2.0.0",
+		IsProd:  false,
 	}
 
 	if err := app.Run(); err != nil {

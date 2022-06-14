@@ -1,10 +1,12 @@
 package http
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/z9fr/blog-backend/internal/user"
 )
 
 type LoginReq struct {
@@ -18,7 +20,7 @@ func (h *Handler) FetchuserbyUsername(w http.ResponseWriter, r *http.Request) {
 	user_exist := h.UserService.IsUsernameTaken(username)
 
 	if !user_exist {
-		h.sendErrorResponse(w, "404 user not found", fmt.Errorf("no user with that username"), 404)
+		h.sendErrorResponse(w, "404 user not found", fmt.Errorf("no user with that username"), http.StatusNotFound)
 		return
 	}
 
@@ -27,9 +29,49 @@ func (h *Handler) FetchuserbyUsername(w http.ResponseWriter, r *http.Request) {
 	user_details, err := h.UserService.GetUserbyUsername(username)
 
 	if err != nil {
-		h.sendErrorResponse(w, "Internal server error", err, 500)
+		h.sendErrorResponse(w, "Internal server error", err, http.StatusInternalServerError)
 	}
 
 	h.sendOkResponse(w, user_details)
 	return
+}
+
+func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+	var userInput user.User
+
+	if err := json.NewDecoder(r.Body).Decode(&userInput); err != nil {
+		h.sendErrorResponse(w, "Failed to decode the JSON body", err, http.StatusInternalServerError)
+		return
+	}
+
+	// check if the username or password taken
+
+	userMailExist := h.UserService.IsEmailTaken(userInput.Email)
+	userUsernameExist := h.UserService.IsEmailTaken(userInput.UserName)
+
+	if userMailExist {
+		h.sendErrorResponse(w, "Email is already taken.", fmt.Errorf("Email is taken."), http.StatusConflict)
+		return
+	}
+
+	if userUsernameExist {
+		h.sendErrorResponse(w, "Username is already taken.", fmt.Errorf("username is taken."), http.StatusConflict)
+		return
+	}
+
+	// save the user on db
+	createdUser, err := h.UserService.CreateUser(userInput)
+
+	if err != nil {
+		h.sendErrorResponse(w, "Unable to create a user please try again", err, http.StatusInternalServerError)
+		return
+	}
+
+	h.sendOkResponse(w, struct {
+		Username string `json:"string"`
+		Email    string `json:"string"`
+	}{
+		Username: createdUser.UserName,
+		Email:    createdUser.Email,
+	})
 }

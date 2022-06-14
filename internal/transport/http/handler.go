@@ -19,12 +19,14 @@ type Handler struct {
 	Router      *chi.Mux
 	PostService *post.Service
 	UserService *user.Service
+	IsProd      bool
 }
 
 // NewHandler -  construcutre to create and return a pointer to a handler
-func NewHandler(postservice *post.Service) *Handler {
+func NewHandler(postservice *post.Service, isprod bool) *Handler {
 	return &Handler{
 		PostService: postservice,
+		IsProd:      isprod,
 	}
 }
 
@@ -91,6 +93,11 @@ func (h *Handler) SetupRotues() {
 		r.Get("/posts", h.FetchallPosts)
 		r.Get("/post/{slug}", h.FetcheventbySlug)
 		r.Get("/user/{username}", h.FetchuserbyUsername)
+
+		// do not allow regisration on prod
+		if !h.IsProd {
+			r.Post("/user/create", h.CreateUser)
+		}
 
 		/* handle errors */
 
