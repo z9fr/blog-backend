@@ -1,10 +1,10 @@
 package main
 
 import (
-	"net/http"
-
 	log "github.com/sirupsen/logrus"
+	"github.com/z9fr/blog-backend/internal/database"
 	transportHttp "github.com/z9fr/blog-backend/internal/transport/http"
+	"net/http"
 )
 
 type App struct {
@@ -19,8 +19,20 @@ func (app *App) Run() error {
 			"AppVersion": app.Version,
 		}).Info("Setting up Application")
 
-	// setup routess
+	// setup the database
 
+	db, err := database.NewDatabase()
+
+	if err != nil {
+		return err
+	}
+
+	err = database.MigrateDB(db)
+	if err != nil {
+		return err
+	}
+
+	// setup the routes and http handler
 	handler := transportHttp.NewHandler()
 	handler.SetupRotues()
 
