@@ -5,4 +5,4 @@ run:
 	go run cmd/server/main.go
 
 test:
-	go test ./tests -v
+	go clean -testcache && go test ./tests -v
