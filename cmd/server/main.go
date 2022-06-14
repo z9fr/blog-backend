@@ -50,7 +50,7 @@ func (app *App) Run() error {
 func main() {
 	app := App{
 		Name:    "api.z9fr.xyz",
-		Version: "1.0.0",
+		Version: "2.0.0",
 	}
 
 	if err := app.Run(); err != nil {

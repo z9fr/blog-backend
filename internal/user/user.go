@@ -3,7 +3,6 @@ package user
 import (
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/z9fr/blog-backend/internal/utils"
 	"gorm.io/gorm"
 )
@@ -61,7 +60,6 @@ func (s *Service) GetUserbyEmail(email string) (User, error) {
 func (s *Service) CreateUser(user User) (User, error) {
 
 	hashedPassword, err := utils.HashPassword(user.Password)
-	user.ID = uuid.NewString()
 
 	if err != nil {
 		return User{}, fmt.Errorf("Unable to hash user password %w", err)

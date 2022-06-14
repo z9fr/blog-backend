@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/z9fr/blog-backend/internal/post"
+	"github.com/z9fr/blog-backend/internal/user"
 
 	"github.com/go-chi/httprate"
 )
@@ -17,6 +18,7 @@ type Handler struct {
 	// service and router
 	Router      *chi.Mux
 	PostService *post.Service
+	UserService *user.Service
 }
 
 // NewHandler -  construcutre to create and return a pointer to a handler
@@ -88,6 +90,7 @@ func (h *Handler) SetupRotues() {
 
 		r.Get("/posts", h.FetchallPosts)
 		r.Get("/post/{slug}", h.FetcheventbySlug)
+		r.Get("/user/{username}", h.FetchuserbyUsername)
 
 		/* handle errors */
 
