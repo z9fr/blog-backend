@@ -93,6 +93,7 @@ func (h *Handler) SetupRotues() {
 		r.Get("/posts", h.FetchallPosts)
 		r.Get("/post/{slug}", h.FetcheventbySlug)
 		r.Get("/user/{username}", h.FetchuserbyUsername)
+		r.Get("/health", h.GetApplicationHealth)
 
 		// do not allow regisration on prod
 		if !h.IsProd {
