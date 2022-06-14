@@ -110,6 +110,11 @@ func (h *Handler) SetupRotues() {
 			r.Post("/user/create", h.CreateUser)
 		}
 
+		r.Route("/post/create", func(r chi.Router) {
+			r.Use(h.JWTMiddlewhare)
+			r.Post("/", h.GetApplicationHealth)
+		})
+
 		/* handle errors */
 
 		h.Router.NotFound(func(w http.ResponseWriter, r *http.Request) {
