@@ -5,4 +5,4 @@ run:
 	go run cmd/server/main.go
 
 test:
-	go test ./tests
+	go test ./tests -v

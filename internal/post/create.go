@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/z9fr/blog-backend/internal/types"
+	"github.com/z9fr/blog-backend/internal/utils"
 )
 
 func (s *Service) CreatePost(post types.Post) (types.Post, error) {
@@ -11,5 +12,18 @@ func (s *Service) CreatePost(post types.Post) (types.Post, error) {
 		return types.Post{}, errors.New("post with the same title already exist")
 	}
 
-	return types.Post{}, nil
+	generatedSlug := func(postTitle string) string {
+
+		postTitle = utils.GenerateSlug(postTitle, false)
+
+		if !s.IsSlugTaken(postTitle) {
+			return postTitle
+		}
+
+		return utils.GenerateSlug(postTitle, true)
+	}
+
+	post.Slug = generatedSlug(post.Title)
+
+	return post, nil
 }
