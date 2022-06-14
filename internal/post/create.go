@@ -3,6 +3,7 @@ package post
 import (
 	"errors"
 
+	"github.com/sirupsen/logrus"
 	"github.com/z9fr/blog-backend/internal/types"
 	"github.com/z9fr/blog-backend/internal/utils"
 )
@@ -12,6 +13,7 @@ func (s *Service) CreatePost(post types.Post) (types.Post, error) {
 		return types.Post{}, errors.New("post with the same title already exist")
 	}
 
+	// generate a slug based on the post title
 	generatedSlug := func(postTitle string) string {
 
 		postTitle = utils.GenerateSlug(postTitle, false)
@@ -24,6 +26,11 @@ func (s *Service) CreatePost(post types.Post) (types.Post, error) {
 	}
 
 	post.Slug = generatedSlug(post.Title)
+
+	if result := s.DB.Debug().Save(&post); result.Error != nil {
+		logrus.Warn(result.Error)
+		return types.Post{}, result.Error
+	}
 
 	return post, nil
 }
