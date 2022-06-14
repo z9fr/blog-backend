@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	performancedb "github.com/z9fr/blog-backend/internal/performanceDb"
 	"github.com/z9fr/blog-backend/internal/post"
 	"github.com/z9fr/blog-backend/internal/user"
 
@@ -16,17 +17,19 @@ import (
 
 type Handler struct {
 	// service and router
-	Router      *chi.Mux
-	PostService *post.Service
-	UserService *user.Service
-	IsProd      bool
+	Router              *chi.Mux
+	PostService         *post.Service
+	UserService         *user.Service
+	PerformanceDatabase *performancedb.Service
+	IsProd              bool
 }
 
 // NewHandler -  construcutre to create and return a pointer to a handler
-func NewHandler(postservice *post.Service, isprod bool) *Handler {
+func NewHandler(postservice *post.Service, dbstatus *performancedb.Service, isprod bool) *Handler {
 	return &Handler{
-		PostService: postservice,
-		IsProd:      isprod,
+		PostService:         postservice,
+		PerformanceDatabase: dbstatus,
+		IsProd:              isprod,
 	}
 }
 

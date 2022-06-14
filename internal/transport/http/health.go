@@ -9,12 +9,15 @@ import (
 
 func (h *Handler) GetApplicationHealth(w http.ResponseWriter, r *http.Request) {
 	usage := utils.GetMemUsage()
+	dbstatus := h.PerformanceDatabase.Stats()
 
 	h.sendOkResponse(w, struct {
-		Status string         `json:"status"`
-		Usage  types.MemUsage `json:"usage"`
+		Status   string         `json:"status"`
+		Usage    types.MemUsage `json:"usage"`
+		DBstatus [5]string      `json:"dbStatus"`
 	}{
-		Status: "running",
-		Usage:  usage,
+		Status:   "running",
+		Usage:    usage,
+		DBstatus: dbstatus,
 	})
 }

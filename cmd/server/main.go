@@ -5,6 +5,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/z9fr/blog-backend/internal/database"
+	performancedb "github.com/z9fr/blog-backend/internal/performanceDb"
 	"github.com/z9fr/blog-backend/internal/post"
 	transportHttp "github.com/z9fr/blog-backend/internal/transport/http"
 )
@@ -36,9 +37,10 @@ func (app *App) Run() error {
 	}
 
 	postservice := post.NewService(db)
+	dbstatus := performancedb.NewService(db)
 
 	// setup the routes and http handler
-	handler := transportHttp.NewHandler(postservice, app.IsProd)
+	handler := transportHttp.NewHandler(postservice, dbstatus, app.IsProd)
 	handler.SetupRotues()
 
 	if err := http.ListenAndServe(":4000", handler.Router); err != nil {
