@@ -23,20 +23,14 @@ type Model struct {
 
 type Post struct {
 	Model
-	Title  string `gorm:"column:title" json:"title"`
-	Text   string `gorm:"column:text" json:"text"`
-	Slug   string `gorm:"uniqueIndex:idx_first_second" json:"slug"`
-	Author string `gorm:"column:author" json:"author"`
-	Tags   []Tag  `gorm:"foreignKey:ID;references:ID" json:"tags"`
+	Title       string `gorm:"column:title" json:"title"`
+	Text        string `gorm:"column:text" json:"text"`
+	Description string `gorm:"column:description" json:"description"`
+	Slug        string `gorm:"uniqueIndex:idx_first_second" json:"slug"`
+	Author      string `gorm:"column:author" json:"author"`
+	Tags        []Tag  `gorm:"foreignKey:ID;references:ID" json:"tags"`
 }
 
-/*
-* issue
-
-there's a bug with tags and this relationship is not correct. fix this later
-*/
-
-// Tag of Blog Post (hashtag)
 type Tag struct {
 	Model
 	PostID uint   `gorm:"type:int" json:"post_id"`
@@ -64,10 +58,7 @@ func NewService(db *gorm.DB) *Service {
 // GetPost - return a Post by ID
 func (s *Service) GetPost(ID uint) (Post, error) {
 	var post Post
-	err := s.DB.Where("id = ?", ID).
-		Preload("Tags").
-		Find(&post).
-		Error
+	err := s.DB.Debug().Preload("Tags").Where("id = ?", ID).Find(&post)
 
 	if err != nil {
 		return Post{}, nil
@@ -79,8 +70,8 @@ func (s *Service) GetPost(ID uint) (Post, error) {
 // GetPostsBySlug - retrieves all Posts by slug ( path - /article/name )
 func (s *Service) GetPostBySlug(slug string) (Post, error) {
 	var post Post
-	err := s.DB.Where("slug = ?", slug).
-		Preload("Tags").
+	err := s.DB.Debug().Preload("Tags").
+		Where("slug = ?", slug).
 		Find(&post).
 		Error
 
@@ -132,7 +123,7 @@ func (s *Service) DeletePost(ID uint) error {
 func (s *Service) GetAllPosts() ([]Post, error) {
 	var posts []Post
 
-	if result := s.DB.Find(&posts); result.Error != nil {
+	if result := s.DB.Debug().Preload("Tags").Find(&posts); result.Error != nil {
 		return []Post{}, result.Error
 	}
 	return posts, nil
@@ -142,7 +133,7 @@ func (s *Service) GetAllPosts() ([]Post, error) {
 func (s *Service) GetLimitedPosts(count uint) ([]Post, error) {
 	var posts []Post
 
-	if result := s.DB.Limit(int(count)).Find(&posts); result.Error != nil {
+	if result := s.DB.Limit(int(count)).Preload("Tags").Find(&posts); result.Error != nil {
 		return []Post{}, result.Error
 	}
 
