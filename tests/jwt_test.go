@@ -28,5 +28,17 @@ func TestGenerateJWT(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	t.Log(fmt.Sprintf("Token Secret -> %s\nJWT token -> %s", ApplicationSecret, token))
+	t.Log(fmt.Sprintf("\nToken Secret -> %s\nJWT token -> %s", ApplicationSecret, token))
+
+	ValidateTokenTest(t, token)
+}
+
+func ValidateTokenTest(t *testing.T, tokenString string) {
+	user, err := utils.VerifyToken(tokenString, ApplicationSecret)
+
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	t.Log(fmt.Sprintf("\nuser -> %s\nemail -> %s", user.UserName, user.Email))
 }

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/z9fr/blog-backend/internal/types"
 )
 
 //   https://www.bacancytechnology.com/blog/golang-jwt
@@ -16,8 +17,10 @@ func GenerateJWT(username string, email string, appsecret string) (string, error
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 
-	claims["username"] = username
-	claims["email"] = email
+	claims["user"] = types.TokenDetails{
+		UserName: username,
+		Email:    email,
+	}
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
 	tokenString, err := token.SignedString(mySigningKey)
