@@ -10,6 +10,7 @@ import (
 	performancedb "github.com/z9fr/blog-backend/internal/performanceDb"
 	"github.com/z9fr/blog-backend/internal/post"
 	transportHttp "github.com/z9fr/blog-backend/internal/transport/http"
+	"github.com/z9fr/blog-backend/internal/user"
 	"github.com/z9fr/blog-backend/internal/utils"
 )
 
@@ -55,10 +56,11 @@ func (app *App) Run() error {
 	}
 
 	postservice := post.NewService(db)
+	userservice := user.NewService(db)
 	dbstatus := performancedb.NewService(db)
 
 	// setup the routes and http handler
-	handler := transportHttp.NewHandler(postservice, dbstatus, app.IsProd, startTime, ApplicationSecret)
+	handler := transportHttp.NewHandler(postservice, userservice, dbstatus, app.IsProd, startTime, ApplicationSecret)
 	handler.SetupRotues()
 
 	if err := http.ListenAndServe(":4000", handler.Router); err != nil {

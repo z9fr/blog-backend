@@ -27,9 +27,10 @@ type Handler struct {
 }
 
 // NewHandler -  construcutre to create and return a pointer to a handler
-func NewHandler(postservice *post.Service, dbstatus *performancedb.Service, isprod bool, starttime time.Time, secret string) *Handler {
+func NewHandler(postservice *post.Service, userservice *user.Service, dbstatus *performancedb.Service, isprod bool, starttime time.Time, secret string) *Handler {
 	return &Handler{
 		PostService:         postservice,
+		UserService:         userservice,
 		PerformanceDatabase: dbstatus,
 		IsProd:              isprod,
 		StartTime:           starttime,
@@ -101,6 +102,8 @@ func (h *Handler) SetupRotues() {
 		r.Get("/post/{slug}", h.FetcheventbySlug)
 		r.Get("/user/{username}", h.FetchuserbyUsername)
 		r.Get("/health", h.GetApplicationHealth)
+
+		r.Post("/login", h.AuthUser)
 
 		// do not allow regisration on prod
 		if !h.IsProd {

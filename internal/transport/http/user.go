@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/z9fr/blog-backend/internal/user"
+	"github.com/z9fr/blog-backend/internal/utils"
 )
 
 type LoginReq struct {
@@ -68,10 +69,50 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.sendOkResponse(w, struct {
-		Username string `json:"string"`
-		Email    string `json:"string"`
+		Username string `json:"username"`
+		Email    string `json:"email"`
 	}{
 		Username: createdUser.UserName,
 		Email:    createdUser.Email,
+	})
+
+}
+
+// Authenticate User
+func (h *Handler) AuthUser(w http.ResponseWriter, r *http.Request) {
+	var creds LoginReq
+
+	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+		h.sendErrorResponse(w, "Failed to decode JSON body", err, http.StatusInternalServerError)
+		return
+	}
+
+	actualUser, err := h.UserService.GetUserbyEmail(creds.Email)
+
+	if err != nil {
+		h.sendErrorResponse(w, "Login Failed", err, http.StatusUnauthorized)
+		return
+	}
+
+	isPasswordCorrect := utils.CheckPasswordHash(creds.Password, actualUser.Password)
+
+	if !isPasswordCorrect {
+		h.sendErrorResponse(w, "Authenticate Failed", fmt.Errorf("Invalid email or password"), http.StatusUnauthorized)
+		return
+	}
+
+	authtoken, err := utils.GenerateJWT(actualUser.UserName, actualUser.Email, h.ApplicationSecret)
+
+	if err != nil {
+		h.sendErrorResponse(w, "Inernal server error", err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", authtoken))
+
+	h.sendOkResponse(w, struct {
+		AuthToken string `json:"auth_token"`
+	}{
+		AuthToken: authtoken,
 	})
 }

@@ -15,7 +15,7 @@ type User struct {
 	gorm.Model
 	UserName    string `gorm:"column:username;uniqueIndex:idx_username" json:"username"`
 	Description string `gorm:"column:description" json:"description"`
-	Email       string `gorm:"column:email;uniqueIndex:idx_email" json:"email"`
+	Email       string `gorm:"column:email" json:"email"` // ;uniqueIndex:idx_email
 	Password    string `gorm:"column:password" json:"password"`
 }
 
@@ -38,7 +38,7 @@ func NewService(db *gorm.DB) *Service {
 func (s *Service) GetUserbyUsername(username string) (User, error) {
 	var user User
 
-	if result := s.DB.First(&user, "username = ?", username); result.Error != nil {
+	if result := s.DB.Debug().First(&user, "username = ?", username); result.Error != nil {
 		return User{}, result.Error
 	}
 
@@ -49,10 +49,9 @@ func (s *Service) GetUserbyUsername(username string) (User, error) {
 func (s *Service) GetUserbyEmail(email string) (User, error) {
 	var user User
 
-	if result := s.DB.First(&user, "email = ?", email); result.Error != nil {
+	if result := s.DB.Debug().First(&user, "email = ?", email); result.Error != nil {
 		return User{}, result.Error
 	}
-
 	return user, nil
 }
 
