@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/z9fr/blog-backend/internal/database"
@@ -14,6 +15,12 @@ type App struct {
 	Name    string
 	Version string
 	IsProd  bool
+}
+
+var startTime time.Time
+
+func init() {
+	startTime = time.Now()
 }
 
 func (app *App) Run() error {
@@ -40,7 +47,7 @@ func (app *App) Run() error {
 	dbstatus := performancedb.NewService(db)
 
 	// setup the routes and http handler
-	handler := transportHttp.NewHandler(postservice, dbstatus, app.IsProd)
+	handler := transportHttp.NewHandler(postservice, dbstatus, app.IsProd, startTime)
 	handler.SetupRotues()
 
 	if err := http.ListenAndServe(":4000", handler.Router); err != nil {

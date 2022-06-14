@@ -22,14 +22,16 @@ type Handler struct {
 	UserService         *user.Service
 	PerformanceDatabase *performancedb.Service
 	IsProd              bool
+	StartTime           time.Time
 }
 
 // NewHandler -  construcutre to create and return a pointer to a handler
-func NewHandler(postservice *post.Service, dbstatus *performancedb.Service, isprod bool) *Handler {
+func NewHandler(postservice *post.Service, dbstatus *performancedb.Service, isprod bool, starttime time.Time) *Handler {
 	return &Handler{
 		PostService:         postservice,
 		PerformanceDatabase: dbstatus,
 		IsProd:              isprod,
+		StartTime:           starttime,
 	}
 }
 
