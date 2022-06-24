@@ -37,3 +37,25 @@ func (h *Handler) WritePostHandler(w http.ResponseWriter, r *http.Request) {
 	h.sendOkResponse(w, created_post)
 	return
 }
+
+func (h *Handler) PublishPost(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	decoder := json.NewDecoder(r.Body)
+	details := struct {
+		Slug string `json:"slug"`
+	}{}
+	if err := decoder.Decode(&details); err != nil {
+		h.sendErrorResponse(w, "Failed to deocde JSON body", err, http.StatusBadRequest)
+		return
+	}
+
+	isPosted := h.PostService.PublishPost(details.Slug)
+
+	h.sendOkResponse(w, struct {
+		Success bool `success`
+	}{
+		Success: isPosted,
+	})
+
+	return
+}

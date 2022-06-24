@@ -115,6 +115,11 @@ func (h *Handler) SetupRotues() {
 			r.Post("/", h.WritePostHandler)
 		})
 
+		r.Route("/post/update", func(r chi.Router) {
+			r.Use(h.JWTMiddlewhare)
+			r.Put("/publish", h.PublishPost)
+		})
+
 		/* handle errors */
 
 		h.Router.NotFound(func(w http.ResponseWriter, r *http.Request) {

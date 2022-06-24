@@ -34,3 +34,15 @@ func (s *Service) WritePost(post types.Post) (types.Post, error) {
 
 	return post, nil
 }
+
+func (s *Service) PublishPost(postSlug string) bool {
+	isExist := s.IsSlugTaken(postSlug)
+
+	if isExist {
+		postdetails := s.GetPostsBySlug(postSlug)
+		postdetails.IsPublic = true
+		s.DB.Debug().Save(postdetails)
+		return true
+	}
+	return false
+}
