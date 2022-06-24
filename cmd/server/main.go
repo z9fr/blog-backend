@@ -2,9 +2,9 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/z9fr/blog-backend/internal/database"
 	performancedb "github.com/z9fr/blog-backend/internal/performanceDb"
@@ -25,10 +25,10 @@ var ApplicationSecret string
 
 func init() {
 	startTime = time.Now()
-	secret, err := utils.SecretGenerator(100)
+	secret := "secret"
 
-	if err != nil {
-		logrus.Panic("Unable to generate the secret", err)
+	if os.Getenv("ENV") == "prod" {
+		secret, _ = utils.SecretGenerator(100)
 	}
 
 	ApplicationSecret = secret

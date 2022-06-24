@@ -15,7 +15,7 @@ type Service struct {
 
 type PostService interface {
 	// create
-	CreatePost(post types.Post) (types.Post, error)
+	WritePost(post types.Post) (types.Post, error)
 
 	// fetch
 	GetAllPosts() []*types.Post

@@ -112,7 +112,7 @@ func (h *Handler) SetupRotues() {
 
 		r.Route("/post/create", func(r chi.Router) {
 			r.Use(h.JWTMiddlewhare)
-			r.Post("/", h.GetApplicationHealth)
+			r.Post("/", h.WritePostHandler)
 		})
 
 		/* handle errors */

@@ -8,7 +8,7 @@ import (
 	"github.com/z9fr/blog-backend/internal/utils"
 )
 
-func (s *Service) CreatePost(post types.Post) (types.Post, error) {
+func (s *Service) WritePost(post types.Post) (types.Post, error) {
 	if s.IsTitleTaken(post.Title) {
 		return types.Post{}, errors.New("post with the same title already exist")
 	}
