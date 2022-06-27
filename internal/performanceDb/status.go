@@ -20,9 +20,9 @@ func NewService(db *gorm.DB) *Service {
 	}
 }
 
-func (s *Service) Stats() [5]string {
+func (s *Service) Stats() [5]time.Duration {
 
-	var dbPerformance [5]string
+	var dbPerformance [5]time.Duration
 
 	for i := 0; i < 5; i++ {
 		// query database
@@ -38,7 +38,7 @@ func (s *Service) Stats() [5]string {
 		// that it can be reused by next iteration
 		rows.Close()
 
-		dbPerformance[i] = firstQueryEnd.Sub(firstQueryStart).String()
+		dbPerformance[i] = firstQueryEnd.Sub(firstQueryStart)
 		logrus.Info(fmt.Sprintf("query #%d took %s", i, firstQueryEnd.Sub(firstQueryStart).String()))
 	}
 

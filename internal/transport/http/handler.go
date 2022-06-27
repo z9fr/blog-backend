@@ -101,7 +101,6 @@ func (h *Handler) SetupRotues() {
 		r.Get("/posts", h.FetchallPosts)
 		r.Get("/post/{slug}", h.FetcheventbySlug)
 		r.Get("/user/{username}", h.FetchuserbyUsername)
-		r.Get("/health", h.GetApplicationHealth)
 
 		r.Post("/login", h.AuthUser)
 
@@ -118,6 +117,11 @@ func (h *Handler) SetupRotues() {
 		r.Route("/post/update", func(r chi.Router) {
 			r.Use(h.JWTMiddlewhare)
 			r.Put("/publish", h.PublishPost)
+		})
+
+		r.Route("/health", func(r chi.Router) {
+			r.Use(h.JWTMiddlewhare)
+			r.Get("/", h.GetApplicationHealth)
 		})
 
 		/* handle errors */
