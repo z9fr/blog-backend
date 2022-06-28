@@ -33,3 +33,9 @@ func (h *Handler) FetchUnpublishedAllEvents(w http.ResponseWriter, r *http.Reque
 	// not implemented
 	return
 }
+
+func (h *Handler) UnpublishedPosts(w http.ResponseWriter, r *http.Request) {
+	posts := h.PostService.GetUnpublishedPosts()
+	h.sendOkResponse(w, posts)
+	return
+}

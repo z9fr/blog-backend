@@ -37,3 +37,10 @@ func (s *Service) TotalPublishedPostCount() int64 {
 
 	return count
 }
+
+func (s *Service) GetUnpublishedPosts() []*types.Post {
+	var posts []*types.Post
+	s.DB.Debug().Order("created_at DESC").Where("is_public = ?", false).Find(&posts)
+
+	return posts
+}

@@ -124,6 +124,11 @@ func (h *Handler) SetupRotues() {
 			r.Get("/", h.GetApplicationHealth)
 		})
 
+		r.Route("/posts/private", func(r chi.Router) {
+			r.Use(h.JWTMiddlewhare)
+			r.Get("/", h.UnpublishedPosts)
+		})
+
 		/* handle errors */
 
 		h.Router.NotFound(func(w http.ResponseWriter, r *http.Request) {
