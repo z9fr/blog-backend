@@ -99,6 +99,7 @@ func (h *Handler) SetupRotues() {
 		}))
 
 		r.Get("/posts", h.FetchallPosts)
+		r.Get("/rss", h.RSSFeed)
 		r.Get("/post/{slug}", h.FetcheventbySlug)
 		r.Get("/user/{username}", h.FetchuserbyUsername)
 
