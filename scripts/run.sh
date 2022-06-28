@@ -6,3 +6,5 @@ export DB_HOST=localhost
 export DB_PORT=5432
 export DB_TABLE=postgres
 export ENV=local
+export REDIS_HOST=localhost
+export REDIS_PORT=6379

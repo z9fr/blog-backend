@@ -1,6 +1,7 @@
 package post
 
 import (
+	"github.com/go-redis/redis"
 	"github.com/z9fr/blog-backend/internal/types"
 	"gorm.io/gorm"
 )
@@ -10,7 +11,8 @@ const (
 )
 
 type Service struct {
-	DB *gorm.DB
+	DB          *gorm.DB
+	RedisClient *redis.Client
 }
 
 type PostService interface {
@@ -29,8 +31,9 @@ type PostService interface {
 
 // NewService - create a instance of this service and return
 // a pointer to the servie
-func NewService(db *gorm.DB) *Service {
+func NewService(db *gorm.DB, redisClient *redis.Client) *Service {
 	return &Service{
-		DB: db,
+		DB:          db,
+		RedisClient: redisClient,
 	}
 }

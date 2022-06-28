@@ -9,6 +9,7 @@ import (
 	"github.com/z9fr/blog-backend/internal/database"
 	performancedb "github.com/z9fr/blog-backend/internal/performanceDb"
 	"github.com/z9fr/blog-backend/internal/post"
+	"github.com/z9fr/blog-backend/internal/redis"
 	transportHttp "github.com/z9fr/blog-backend/internal/transport/http"
 	"github.com/z9fr/blog-backend/internal/user"
 	"github.com/z9fr/blog-backend/internal/utils"
@@ -55,7 +56,9 @@ func (app *App) Run() error {
 		return err
 	}
 
-	postservice := post.NewService(db)
+	redisClient := redis.NewRedis()
+
+	postservice := post.NewService(db, redisClient)
 	userservice := user.NewService(db)
 	dbstatus := performancedb.NewService(db)
 
